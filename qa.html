@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q&amp;A</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f14;
+      color: #e2e2e8;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7c6ff7, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: #7a7a8e;
+      font-size: 1rem;
+    }
+
+    /* Ask form */
+    .ask-form {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .ask-form h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #9d9db5;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .ask-form input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      background: #0f0f14;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      color: #e2e2e8;
+      font-size: 0.95rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .ask-form input[type="text"]:focus {
+      border-color: #7c6ff7;
+    }
+
+    .ask-form input[type="text"]::placeholder {
+      color: #4a4a60;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #7c6ff7, #c084fc);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.88;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.97);
+    }
+
+    /* FAQ list */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .faq-item {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .faq-item:hover {
+      border-color: #3d3d5c;
+    }
+
+    .faq-item.open {
+      border-color: #7c6ff7;
+    }
+
+    .faq-question {
+      align-items: center;
+      background: none;
+      border: none;
+      color: #e2e2e8;
+      cursor: pointer;
+      display: flex;
+      font-size: 1rem;
+      font-weight: 500;
+      gap: 0.75rem;
+      justify-content: space-between;
+      padding: 1.1rem 1.25rem;
+      text-align: left;
+      width: 100%;
+    }
+
+    .faq-question span.q-label {
+      background: linear-gradient(135deg, #7c6ff7, #c084fc);
+      border-radius: 6px;
+      color: #fff;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+    }
+
+    .faq-question span.q-text {
+      flex: 1;
+    }
+
+    .faq-icon {
+      color: #7c6ff7;
+      flex-shrink: 0;
+      font-size: 1.25rem;
+      transition: transform 0.25s ease;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      color: #9d9db5;
+      display: grid;
+      font-size: 0.95rem;
+      grid-template-rows: 0fr;
+      line-height: 1.7;
+      transition: grid-template-rows 0.3s ease;
+    }
+
+    .faq-item.open .faq-answer {
+      grid-template-rows: 1fr;
+    }
+
+    .faq-answer-inner {
+      overflow: hidden;
+    }
+
+    .faq-answer-inner p {
+      border-top: 1px solid #2a2a3a;
+      padding: 1rem 1.25rem 1.1rem;
+    }
+
+    /* User-submitted questions */
+    .user-questions {
+      margin-top: 2.5rem;
+    }
+
+    .user-questions h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #9d9db5;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+
+    .user-q-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .user-q-card {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .user-q-card span.q-label {
+      background: #2a2a3a;
+      border-radius: 6px;
+      color: #7a7a8e;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+    }
+
+    .user-q-card p {
+      color: #c5c5d8;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .no-questions {
+      color: #4a4a60;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    /* Empty state */
+    .empty {
+      color: #4a4a60;
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Otázky &amp; Odpovědi</h1>
+      <p>Najdi odpovědi na nejčastější dotazy nebo polož vlastní otázku.</p>
+    </header>
+
+    <!-- Ask a question -->
+    <div class="ask-form">
+      <h2>Polož otázku</h2>
+      <div class="form-row">
+        <input type="text" id="questionInput" placeholder="Na co se chceš zeptat?" />
+        <button class="btn-submit" onclick="submitQuestion()">Odeslat</button>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-list" id="faqList"></div>
+
+    <!-- User questions -->
+    <div class="user-questions">
+      <h2>Příchozí otázky</h2>
+      <div class="user-q-list" id="userQList">
+        <p class="no-questions">Zatím žádné otázky.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const faqs = [
+      {
+        q: "Jak si mohu vytvořit účet?",
+        a: "Klikni na tlačítko 'Registrovat' v pravém horním rohu stránky, vyplň svůj e-mail a heslo a potvrď svůj účet přes e-mail.",
+      },
+      {
+        q: "Jak obnovím zapomenuté heslo?",
+        a: "Na přihlašovací stránce klikni na 'Zapomněl/a jsem heslo', zadej svůj e-mail a pošleme ti odkaz pro reset hesla.",
+      },
+      {
+        q: "Je služba zdarma?",
+        a: "Základní plán je zcela zdarma. Prémiové funkce jsou dostupné v placených plánech — více najdeš na stránce Ceník.",
+      },
+      {
+        q: "Jak se mohu obrátit na podporu?",
+        a: "Náš tým podpory je dostupný přes e-mail support@example.com nebo prostřednictvím live chatu v pravém dolním rohu každé stránky.",
+      },
+      {
+        q: "Mohu svůj účet kdykoliv zrušit?",
+        a: "Ano, svůj účet můžeš zrušit kdykoliv v nastavení profilu. Zrušení je okamžité a data budou smazána do 30 dnů.",
+      },
+    ];
+
+    const faqList = document.getElementById("faqList");
+    const userQList = document.getElementById("userQList");
+
+    // Render FAQ
+    faqs.forEach((item, i) => {
+      const el = document.createElement("div");
+      el.className = "faq-item";
+      el.innerHTML = `
+        <button class="faq-question" onclick="toggleFaq(${i})">
+          <span class="q-label">Q</span>
+          <span class="q-text">${item.q}</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <p>${item.a}</p>
+          </div>
+        </div>
+      `;
+      faqList.appendChild(el);
+    });
+
+    function toggleFaq(index) {
+      const items = faqList.querySelectorAll(".faq-item");
+      items.forEach((item, i) => {
+        if (i === index) {
+          item.classList.toggle("open");
+        } else {
+          item.classList.remove("open");
+        }
+      });
+    }
+
+    // Submit question
+    function submitQuestion() {
+      const input = document.getElementById("questionInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      // Remove "no questions" placeholder
+      const placeholder = userQList.querySelector(".no-questions");
+      if (placeholder) placeholder.remove();
+
+      const card = document.createElement("div");
+      card.className = "user-q-card";
+      card.innerHTML = `<span class="q-label">Q</span><p>${escapeHtml(text)}</p>`;
+      userQList.prepend(card);
+
+      input.value = "";
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    // Allow Enter key to submit
+    document.getElementById("questionInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitQuestion();
+    });
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
