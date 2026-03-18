@@ -13,8 +13,8 @@
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #0f0f14;
-      color: #e2e2e8;
+      background: #f4f4f8;
+      color: #1a1a2e;
       min-height: 100vh;
       padding: 2rem 1rem;
     }
@@ -40,23 +40,24 @@
     }
 
     header p {
-      color: #7a7a8e;
+      color: #6b6b80;
       font-size: 1rem;
     }
 
     /* Ask form */
     .ask-form {
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
+      background: #ffffff;
+      border: 1px solid #dcdce8;
       border-radius: 16px;
       padding: 1.5rem;
       margin-bottom: 2.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
 
     .ask-form h2 {
       font-size: 1rem;
       font-weight: 600;
-      color: #9d9db5;
+      color: #6b6b80;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 1rem;
@@ -71,10 +72,10 @@
     .ask-form input[type="text"] {
       flex: 1;
       min-width: 200px;
-      background: #0f0f14;
-      border: 1px solid #2a2a3a;
+      background: #f4f4f8;
+      border: 1px solid #dcdce8;
       border-radius: 10px;
-      color: #e2e2e8;
+      color: #1a1a2e;
       font-size: 0.95rem;
       padding: 0.75rem 1rem;
       outline: none;
@@ -86,7 +87,7 @@
     }
 
     .ask-form input[type="text"]::placeholder {
-      color: #4a4a60;
+      color: #a0a0b8;
     }
 
     .btn-submit {
@@ -118,15 +119,16 @@
     }
 
     .faq-item {
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
+      background: #ffffff;
+      border: 1px solid #dcdce8;
       border-radius: 14px;
       overflow: hidden;
       transition: border-color 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
     .faq-item:hover {
-      border-color: #3d3d5c;
+      border-color: #b0b0cc;
     }
 
     .faq-item.open {
@@ -137,7 +139,7 @@
       align-items: center;
       background: none;
       border: none;
-      color: #e2e2e8;
+      color: #1a1a2e;
       cursor: pointer;
       display: flex;
       font-size: 1rem;
@@ -176,7 +178,7 @@
     }
 
     .faq-answer {
-      color: #9d9db5;
+      color: #5a5a70;
       display: grid;
       font-size: 0.95rem;
       grid-template-rows: 0fr;
@@ -193,7 +195,7 @@
     }
 
     .faq-answer-inner p {
-      border-top: 1px solid #2a2a3a;
+      border-top: 1px solid #dcdce8;
       padding: 1rem 1.25rem 1.1rem;
     }
 
@@ -205,7 +207,7 @@
     .user-questions h2 {
       font-size: 0.95rem;
       font-weight: 600;
-      color: #9d9db5;
+      color: #6b6b80;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 1rem;
@@ -218,19 +220,20 @@
     }
 
     .user-q-card {
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
+      background: #ffffff;
+      border: 1px solid #dcdce8;
       border-radius: 14px;
       padding: 1.1rem 1.25rem;
       display: flex;
       align-items: flex-start;
       gap: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
     .user-q-card span.q-label {
-      background: #2a2a3a;
+      background: #ebebf5;
       border-radius: 6px;
-      color: #7a7a8e;
+      color: #6b6b80;
       flex-shrink: 0;
       font-size: 0.75rem;
       font-weight: 700;
@@ -239,13 +242,13 @@
     }
 
     .user-q-card p {
-      color: #c5c5d8;
+      color: #3a3a50;
       font-size: 0.95rem;
       line-height: 1.5;
     }
 
     .no-questions {
-      color: #4a4a60;
+      color: #a0a0b8;
       font-size: 0.9rem;
       text-align: center;
       padding: 1rem 0;
@@ -253,7 +256,7 @@
 
     /* Empty state */
     .empty {
-      color: #4a4a60;
+      color: #a0a0b8;
       text-align: center;
       padding: 2rem 0;
       font-size: 0.9rem;
