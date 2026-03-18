@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Q&amp;A</title>
+  <title>Planováč</title>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -13,54 +13,90 @@
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #f4f4f8;
-      color: #1a1a2e;
+      background: #eff6ff;
+      color: #1e3a5f;
       min-height: 100vh;
       padding: 2rem 1rem;
     }
 
     .container {
-      max-width: 780px;
+      max-width: 640px;
       margin: 0 auto;
     }
 
+    /* Header */
     header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
     }
 
     header h1 {
-      font-size: 2.4rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #16a34a, #4ade80);
+      font-size: 2.6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
     }
 
     header p {
-      color: #6b6b80;
+      color: #5a85b0;
       font-size: 1rem;
     }
 
-    /* Ask form */
-    .ask-form {
+    /* Stats bar */
+    .stats {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
       background: #ffffff;
-      border: 1px solid #dcdce8;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 0.75rem 1.25rem;
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.07);
+    }
+
+    .stat-card .stat-number {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      line-height: 1;
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      color: #5a85b0;
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Add task form */
+    .add-form {
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
       border-radius: 16px;
       padding: 1.5rem;
-      margin-bottom: 2.5rem;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 1.75rem;
+      box-shadow: 0 2px 12px rgba(29, 78, 216, 0.08);
     }
 
-    .ask-form h2 {
-      font-size: 1rem;
+    .add-form h2 {
+      font-size: 0.85rem;
       font-weight: 600;
-      color: #6b6b80;
+      color: #5a85b0;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-bottom: 1rem;
+      margin-bottom: 0.9rem;
     }
 
     .form-row {
@@ -69,29 +105,30 @@
       flex-wrap: wrap;
     }
 
-    .ask-form input[type="text"] {
+    .add-form input[type="text"] {
       flex: 1;
       min-width: 200px;
-      background: #f4f4f8;
-      border: 1px solid #dcdce8;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       border-radius: 10px;
-      color: #1a1a2e;
+      color: #1e3a5f;
       font-size: 0.95rem;
       padding: 0.75rem 1rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .ask-form input[type="text"]:focus {
-      border-color: #16a34a;
+    .add-form input[type="text"]:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
     }
 
-    .ask-form input[type="text"]::placeholder {
-      color: #a0a0b8;
+    .add-form input[type="text"]::placeholder {
+      color: #93b8d4;
     }
 
-    .btn-submit {
-      background: linear-gradient(135deg, #16a34a, #4ade80);
+    .btn-add {
+      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
       border: none;
       border-radius: 10px;
       color: #fff;
@@ -103,282 +140,328 @@
       white-space: nowrap;
     }
 
-    .btn-submit:hover {
-      opacity: 0.88;
+    .btn-add:hover { opacity: 0.88; }
+    .btn-add:active { transform: scale(0.97); }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
     }
 
-    .btn-submit:active {
-      transform: scale(0.97);
+    .filter-btn {
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      color: #5a85b0;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.4rem 0.9rem;
+      transition: all 0.15s;
     }
 
-    /* FAQ list */
-    .faq-list {
+    .filter-btn:hover {
+      border-color: #1d4ed8;
+      color: #1d4ed8;
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    /* Task list */
+    .task-list {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.6rem;
     }
 
-    .faq-item {
+    .task-item {
       background: #ffffff;
-      border: 1px solid #dcdce8;
-      border-radius: 14px;
-      overflow: hidden;
-      transition: border-color 0.2s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .faq-item:hover {
-      border-color: #b0b0cc;
-    }
-
-    .faq-item.open {
-      border-color: #16a34a;
-    }
-
-    .faq-question {
+      border: 1px solid #bfdbfe;
+      border-radius: 13px;
+      padding: 1rem 1.1rem;
+      display: flex;
       align-items: center;
+      gap: 0.85rem;
+      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.06);
+      transition: box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .task-item:hover {
+      box-shadow: 0 4px 16px rgba(29, 78, 216, 0.12);
+      border-color: #93c5fd;
+    }
+
+    .task-item.done {
+      opacity: 0.55;
+    }
+
+    /* Checkbox */
+    .task-check {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #93c5fd;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .task-check:checked {
+      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+      border-color: transparent;
+    }
+
+    .task-check:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 0.97rem;
+      color: #1e3a5f;
+      line-height: 1.4;
+      transition: color 0.2s;
+    }
+
+    .task-item.done .task-text {
+      text-decoration: line-through;
+      color: #93b8d4;
+    }
+
+    .task-date {
+      font-size: 0.75rem;
+      color: #93b8d4;
+      white-space: nowrap;
+    }
+
+    .btn-delete {
       background: none;
       border: none;
-      color: #1a1a2e;
+      color: #bfdbfe;
       cursor: pointer;
-      display: flex;
-      font-size: 1rem;
-      font-weight: 500;
-      gap: 0.75rem;
-      justify-content: space-between;
-      padding: 1.1rem 1.25rem;
-      text-align: left;
-      width: 100%;
-    }
-
-    .faq-question span.q-label {
-      background: linear-gradient(135deg, #16a34a, #4ade80);
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 0.2rem 0.3rem;
       border-radius: 6px;
-      color: #fff;
+      transition: color 0.15s, background 0.15s;
       flex-shrink: 0;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      padding: 0.2rem 0.5rem;
     }
 
-    .faq-question span.q-text {
-      flex: 1;
-    }
-
-    .faq-icon {
-      color: #16a34a;
-      flex-shrink: 0;
-      font-size: 1.25rem;
-      transition: transform 0.25s ease;
-    }
-
-    .faq-item.open .faq-icon {
-      transform: rotate(45deg);
-    }
-
-    .faq-answer {
-      color: #5a5a70;
-      display: grid;
-      font-size: 0.95rem;
-      grid-template-rows: 0fr;
-      line-height: 1.7;
-      transition: grid-template-rows 0.3s ease;
-    }
-
-    .faq-item.open .faq-answer {
-      grid-template-rows: 1fr;
-    }
-
-    .faq-answer-inner {
-      overflow: hidden;
-    }
-
-    .faq-answer-inner p {
-      border-top: 1px solid #dcdce8;
-      padding: 1rem 1.25rem 1.1rem;
-    }
-
-    /* User-submitted questions */
-    .user-questions {
-      margin-top: 2.5rem;
-    }
-
-    .user-questions h2 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #6b6b80;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 1rem;
-    }
-
-    .user-q-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .user-q-card {
-      background: #ffffff;
-      border: 1px solid #dcdce8;
-      border-radius: 14px;
-      padding: 1.1rem 1.25rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .user-q-card span.q-label {
-      background: #ebebf5;
-      border-radius: 6px;
-      color: #6b6b80;
-      flex-shrink: 0;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      padding: 0.2rem 0.5rem;
-    }
-
-    .user-q-card p {
-      color: #3a3a50;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    .no-questions {
-      color: #a0a0b8;
-      font-size: 0.9rem;
-      text-align: center;
-      padding: 1rem 0;
+    .btn-delete:hover {
+      color: #ef4444;
+      background: #fee2e2;
     }
 
     /* Empty state */
-    .empty {
-      color: #a0a0b8;
+    .empty-state {
       text-align: center;
-      padding: 2rem 0;
-      font-size: 0.9rem;
+      padding: 3rem 1rem;
+      color: #93b8d4;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    /* Clear all button */
+    .actions-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-clear {
+      background: none;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      color: #5a85b0;
+      cursor: pointer;
+      font-size: 0.82rem;
+      padding: 0.35rem 0.85rem;
+      transition: all 0.15s;
+    }
+
+    .btn-clear:hover {
+      border-color: #ef4444;
+      color: #ef4444;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Otázky &amp; Odpovědi</h1>
-      <p>Najdi odpovědi na nejčastější dotazy nebo polož vlastní otázku.</p>
+      <h1>Planováč</h1>
+      <p>Organizuj své úkoly jednoduše a přehledně.</p>
     </header>
 
-    <!-- Ask a question -->
-    <div class="ask-form">
-      <h2>Polož otázku</h2>
-      <div class="form-row">
-        <input type="text" id="questionInput" placeholder="Na co se chceš zeptat?" />
-        <button class="btn-submit" onclick="submitQuestion()">Odeslat</button>
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">Celkem</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statPending">0</div>
+        <div class="stat-label">Zbývá</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statDone">0</div>
+        <div class="stat-label">Hotovo</div>
       </div>
     </div>
 
-    <!-- FAQ -->
-    <div class="faq-list" id="faqList"></div>
+    <!-- Add task -->
+    <div class="add-form">
+      <h2>Nový úkol</h2>
+      <div class="form-row">
+        <input type="text" id="taskInput" placeholder="Co je potřeba udělat?" />
+        <button class="btn-add" onclick="addTask()">Přidat</button>
+      </div>
+    </div>
 
-    <!-- User questions -->
-    <div class="user-questions">
-      <h2>Příchozí otázky</h2>
-      <div class="user-q-list" id="userQList">
-        <p class="no-questions">Zatím žádné otázky.</p>
+    <!-- Filters + clear -->
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Vše</button>
+      <button class="filter-btn" data-filter="pending" onclick="setFilter('pending', this)">Zbývající</button>
+      <button class="filter-btn" data-filter="done" onclick="setFilter('done', this)">Hotové</button>
+    </div>
+
+    <div class="actions-bar">
+      <button class="btn-clear" onclick="clearDone()">Smazat hotové</button>
+    </div>
+
+    <!-- Task list -->
+    <div class="task-list" id="taskList">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>Zatím žádné úkoly. Přidej první!</p>
       </div>
     </div>
   </div>
 
   <script>
-    const faqs = [
-      {
-        q: "Jak si mohu vytvořit účet?",
-        a: "Klikni na tlačítko 'Registrovat' v pravém horním rohu stránky, vyplň svůj e-mail a heslo a potvrď svůj účet přes e-mail.",
-      },
-      {
-        q: "Jak obnovím zapomenuté heslo?",
-        a: "Na přihlašovací stránce klikni na 'Zapomněl/a jsem heslo', zadej svůj e-mail a pošleme ti odkaz pro reset hesla.",
-      },
-      {
-        q: "Je služba zdarma?",
-        a: "Základní plán je zcela zdarma. Prémiové funkce jsou dostupné v placených plánech — více najdeš na stránce Ceník.",
-      },
-      {
-        q: "Jak se mohu obrátit na podporu?",
-        a: "Náš tým podpory je dostupný přes e-mail support@example.com nebo prostřednictvím live chatu v pravém dolním rohu každé stránky.",
-      },
-      {
-        q: "Mohu svůj účet kdykoliv zrušit?",
-        a: "Ano, svůj účet můžeš zrušit kdykoliv v nastavení profilu. Zrušení je okamžité a data budou smazána do 30 dnů.",
-      },
-    ];
+    let tasks = JSON.parse(localStorage.getItem('planovac-tasks') || '[]');
+    let currentFilter = 'all';
 
-    const faqList = document.getElementById("faqList");
-    const userQList = document.getElementById("userQList");
-
-    // Render FAQ
-    faqs.forEach((item, i) => {
-      const el = document.createElement("div");
-      el.className = "faq-item";
-      el.innerHTML = `
-        <button class="faq-question" onclick="toggleFaq(${i})">
-          <span class="q-label">Q</span>
-          <span class="q-text">${item.q}</span>
-          <span class="faq-icon">+</span>
-        </button>
-        <div class="faq-answer">
-          <div class="faq-answer-inner">
-            <p>${item.a}</p>
-          </div>
-        </div>
-      `;
-      faqList.appendChild(el);
-    });
-
-    function toggleFaq(index) {
-      const items = faqList.querySelectorAll(".faq-item");
-      items.forEach((item, i) => {
-        if (i === index) {
-          item.classList.toggle("open");
-        } else {
-          item.classList.remove("open");
-        }
-      });
+    function saveTasks() {
+      localStorage.setItem('planovac-tasks', JSON.stringify(tasks));
     }
 
-    // Submit question
-    function submitQuestion() {
-      const input = document.getElementById("questionInput");
+    function formatDate() {
+      const now = new Date();
+      return now.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
       const text = input.value.trim();
       if (!text) return;
 
-      // Remove "no questions" placeholder
-      const placeholder = userQList.querySelector(".no-questions");
-      if (placeholder) placeholder.remove();
-
-      const card = document.createElement("div");
-      card.className = "user-q-card";
-      card.innerHTML = `<span class="q-label">Q</span><p>${escapeHtml(text)}</p>`;
-      userQList.prepend(card);
-
-      input.value = "";
-      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      tasks.unshift({ id: Date.now(), text, done: false, date: formatDate() });
+      saveTasks();
+      renderTasks();
+      input.value = '';
+      input.focus();
     }
 
-    // Allow Enter key to submit
-    document.getElementById("questionInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") submitQuestion();
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) { task.done = !task.done; saveTasks(); renderTasks(); }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveTasks();
+      renderTasks();
+    }
+
+    function clearDone() {
+      tasks = tasks.filter(t => !t.done);
+      saveTasks();
+      renderTasks();
+    }
+
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      const filtered = tasks.filter(t => {
+        if (currentFilter === 'pending') return !t.done;
+        if (currentFilter === 'done') return t.done;
+        return true;
+      });
+
+      // Update stats
+      document.getElementById('statTotal').textContent = tasks.length;
+      document.getElementById('statPending').textContent = tasks.filter(t => !t.done).length;
+      document.getElementById('statDone').textContent = tasks.filter(t => t.done).length;
+
+      if (filtered.length === 0) {
+        const msg = currentFilter === 'done'
+          ? 'Žádné dokončené úkoly.'
+          : currentFilter === 'pending'
+          ? 'Všechny úkoly jsou hotové!'
+          : 'Zatím žádné úkoly. Přidej první!';
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>${msg}</p></div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(task => `
+        <div class="task-item ${task.done ? 'done' : ''}">
+          <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onchange="toggleTask(${task.id})" />
+          <span class="task-text">${escapeHtml(task.text)}</span>
+          <span class="task-date">${task.date}</span>
+          <button class="btn-delete" onclick="deleteTask(${task.id})" title="Smazat">✕</button>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('taskInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTask();
     });
 
     function escapeHtml(str) {
       return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
+
+    renderTasks();
   </script>
 </body>
 </html>
