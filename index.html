@@ -3,465 +3,2182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Planováč</title>
+  <title>Sklik AI Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:        #0063E8;
+      --accent-dark:   #0052C2;
+      --accent-light:  #E6F0FF;
+      --sidebar-bg:    #0F172A;
+      --sidebar-hover: #1E293B;
+      --sidebar-act:   rgba(0,99,232,0.14);
+      --sb-text:       #94A3B8;
+      --sb-text-act:   #FFFFFF;
+      --main-bg:       #F8FAFC;
+      --card:          #FFFFFF;
+      --border:        #E2E8F0;
+      --tp:            #0F172A;
+      --ts:            #64748B;
+      --tt:            #94A3B8;
+      --success:       #10B981;
+      --warning:       #F59E0B;
+      --danger:        #EF4444;
+      --info:          #3B82F6;
+      --r:             12px;
+      --rsm:           8px;
+      --sh-sm:         0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+      --sh-md:         0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+      --sh-lg:         0 10px 36px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+      --font:          'Inter', system-ui, -apple-system, sans-serif;
     }
+
+    html, body { height: 100%; }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #eff6ff;
-      color: #1e3a5f;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
-    }
-
-    /* Header */
-    header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
-
-    header h1 {
-      font-size: 2.6rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.4rem;
-      letter-spacing: -0.02em;
-    }
-
-    header p {
-      color: #5a85b0;
-      font-size: 1rem;
-    }
-
-    /* Stats bar */
-    .stats {
+      font-family: var(--font);
       display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--main-bg);
+      color: var(--tp);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────── */
+    #sidebar {
+      width: 256px;
+      min-width: 256px;
+      height: 100vh;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      position: relative;
+    }
+
+    #sidebar::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 180px;
+      background: linear-gradient(to top, rgba(0,99,232,.06), transparent);
+      pointer-events: none;
+    }
+
+    .sb-logo {
+      padding: 22px 18px 18px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+
+    .sb-logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--accent), #3D8EF5);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,99,232,.35);
+    }
+
+    .sb-logo-name { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: -.2px; }
+    .sb-logo-sub  { font-size: 10px; color: var(--sb-text); letter-spacing: .6px; text-transform: uppercase; margin-top: 1px; }
+
+    .sb-nav {
+      flex: 1;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow-y: auto;
+    }
+
+    .sb-new-btn {
+      display: flex; align-items: center; gap: 9px;
+      padding: 11px 13px;
+      background: var(--accent);
+      color: #fff;
+      border: none; border-radius: var(--rsm);
+      font-family: var(--font); font-size: 13.5px; font-weight: 600;
+      cursor: pointer; width: 100%;
+      margin-bottom: 10px;
+      transition: background .2s, transform .15s;
+      box-shadow: 0 2px 8px rgba(0,99,232,.3);
+    }
+    .sb-new-btn:hover  { background: var(--accent-dark); }
+    .sb-new-btn:active { transform: scale(.98); }
+
+    .sb-sep { height: 1px; background: rgba(255,255,255,.06); margin: 6px 4px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--rsm);
+      color: var(--sb-text); font-size: 13.5px; font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, color .15s, box-shadow .15s;
+      border: none; background: none; width: 100%; text-align: left;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--sidebar-hover); color: #fff; border-left-color: transparent; }
+    .nav-item.active {
+      background: rgba(0,99,232,.22);
+      color: #fff;
+      font-weight: 600;
+      border-left-color: var(--accent);
+      box-shadow: inset 0 0 0 1px rgba(0,99,232,.2);
+    }
+    .nav-item svg { flex-shrink: 0; opacity: .7; }
+    .nav-item.active svg { opacity: 1; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(0,99,232,.28); color: #fff;
+      font-size: 10.5px; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+    }
+
+    .sb-bottom {
+      padding: 10px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+
+    .user-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 11px;
+      border-radius: var(--rsm);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .user-row:hover { background: var(--sidebar-hover); }
+
+    .user-av {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #3D8EF5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12.5px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-name { font-size: 12.5px; font-weight: 600; color: #fff; }
+    .user-role { font-size: 11px; color: var(--sb-text); }
+
+    /* ── MAIN ────────────────────────────────────── */
+    #main {
+      flex: 1; overflow-y: auto;
+      display: flex; flex-direction: column;
+      min-width: 0;
+    }
+
+    .view { display: none; flex: 1; flex-direction: column; min-height: 0; }
+    .view.active { display: flex; }
+
+    /* ── PAGE HEADER ─────────────────────────────── */
+    .ph {
+      padding: 28px 32px 0;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .ph-title { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
+    .ph-sub   { font-size: 13px; color: var(--ts); margin-top: 3px; }
+    .ph-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* ── BUTTONS ─────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 16px;
+      border-radius: var(--rsm);
+      font-family: var(--font); font-size: 13.5px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all .2s; white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-secondary { background: var(--card); color: var(--tp); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #F1F5F9; }
+    .btn-ghost { background: transparent; color: var(--ts); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: #F1F5F9; color: var(--tp); }
+    .btn-lg { padding: 12px 24px; font-size: 14.5px; }
+    .btn-sm { padding: 6px 12px; font-size: 12.5px; }
+
+    /* ── SEARCH ──────────────────────────────────── */
+    .search-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rsm); padding: 8px 14px;
+      transition: border-color .2s;
+    }
+    .search-box:focus-within { border-color: var(--accent); }
+    .search-box input { border: none; outline: none; font-family: var(--font); font-size: 13.5px; color: var(--tp); background: none; width: 200px; }
+    .search-box input::placeholder { color: var(--tt); }
+
+    /* ── STATS GRID ──────────────────────────────── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; padding: 24px 32px;
     }
 
     .stat-card {
-      background: #ffffff;
-      border: 1px solid #bfdbfe;
-      border-radius: 12px;
-      padding: 0.75rem 1.25rem;
-      flex: 1;
-      min-width: 100px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.07);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px;
+      box-shadow: var(--sh-sm);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .stat-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+
+    .stat-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .stat-label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--tt); }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -.5px; margin: 8px 0 4px; }
+    .stat-delta { font-size: 12.5px; color: var(--ts); display: flex; align-items: center; gap: 3px; }
+    .stat-delta.up   { color: var(--success); }
+    .stat-delta.down { color: var(--danger); }
+
+    /* ── SECTION ─────────────────────────────────── */
+    .section { padding: 0 32px 32px; flex-shrink: 0; }
+    .sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .sec-title { font-size: 15px; font-weight: 700; }
+
+    /* ── TABLE ───────────────────────────────────── */
+    .tbl-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden; box-shadow: var(--sh-sm);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 10px 16px; text-align: left;
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .5px; color: var(--tt);
+      background: #F8FAFC; border-bottom: 1px solid var(--border);
+    }
+    td { padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFCFF; }
+
+    /* ── BADGE ───────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11.5px; font-weight: 600;
+    }
+    .bd { width: 6px; height: 6px; border-radius: 50%; }
+    .bg-success { background: #ECFDF5; color: #059669; }
+    .bg-success .bd { background: #059669; }
+    .bg-warning { background: #FFFBEB; color: #D97706; }
+    .bg-warning .bd { background: #D97706; }
+    .bg-danger  { background: #FEF2F2; color: #DC2626; }
+    .bg-danger  .bd { background: #DC2626; }
+    .bg-gray    { background: #F1F5F9; color: #64748B; }
+    .bg-gray    .bd { background: #94A3B8; }
+    .bg-info    { background: #EFF6FF; color: #2563EB; }
+    .bg-info    .bd { background: #2563EB; }
+
+    /* ── CLIENT CARDS ────────────────────────────── */
+    /* ── DARK MODE ───────────────────────────────── */
+    body.dark {
+      --main-bg:  #0D1117;
+      --card:     #161B22;
+      --border:   #30363D;
+      --tp:       #E6EDF3;
+      --ts:       #8B949E;
+      --tt:       #6E7681;
+      --sh-sm:    0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+      --sh-md:    0 4px 16px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.2);
+      --sh-lg:    0 10px 36px rgba(0,0,0,.5), 0 4px 12px rgba(0,0,0,.3);
+      --accent-light: rgba(0,99,232,.18);
+    }
+    body.dark input, body.dark select, body.dark textarea {
+      background: #0D1117; color: var(--tp); border-color: var(--border);
+    }
+    body.dark .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236E7681' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     }
 
-    .stat-card .stat-number {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #1d4ed8;
-      line-height: 1;
+    /* ── VIEW TOGGLE (Klienti) ───────────────────── */
+    .view-toggle {
+      display: flex; gap: 2px;
+      background: var(--main-bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 3px;
     }
-
-    .stat-card .stat-label {
-      font-size: 0.75rem;
-      color: #5a85b0;
-      margin-top: 0.25rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+    .vt-btn {
+      width: 30px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      color: var(--ts); transition: background .15s, color .15s;
     }
+    .vt-btn.active { background: var(--card); color: var(--accent); box-shadow: var(--sh-sm); }
+    .vt-btn:hover:not(.active) { background: var(--border); }
 
-    /* Add task form */
-    .add-form {
-      background: #ffffff;
-      border: 1px solid #bfdbfe;
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1.75rem;
-      box-shadow: 0 2px 12px rgba(29, 78, 216, 0.08);
+    /* ── CLIENTS GRID / LIST ─────────────────────── */
+    .clients-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    .client-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px;
+      box-shadow: var(--sh-sm); cursor: pointer;
+      transition: box-shadow .2s, border-color .2s, transform .15s;
     }
+    .client-card:hover { box-shadow: var(--sh-md); border-color: var(--accent); transform: translateY(-2px); }
 
-    .add-form h2 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #5a85b0;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.9rem;
+    .cc-hd { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .cc-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 800; color: #fff; flex-shrink: 0;
     }
+    .cc-name   { font-size: 14.5px; font-weight: 700; }
+    .cc-domain { font-size: 12px; color: var(--tt); margin-top: 1px; }
+    .cc-stats  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .cc-stat-lbl { font-size: 10.5px; color: var(--tt); text-transform: uppercase; letter-spacing: .4px; font-weight: 600; }
+    .cc-stat-val { font-size: 14px; font-weight: 600; margin-top: 2px; }
+    .cc-ft { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
 
-    .form-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
+    /* List mode */
+    .clients-grid.list-mode { display: flex; flex-direction: column; gap: 6px; }
+    .clients-grid.list-mode .client-card {
+      padding: 12px 16px; display: flex; align-items: center; gap: 14px;
+      transform: none !important;
     }
+    .clients-grid.list-mode .cc-hd { margin-bottom: 0; flex: 1; min-width: 0; }
+    .clients-grid.list-mode .cc-logo { width: 36px; height: 36px; font-size: 14px; border-radius: 8px; }
+    .clients-grid.list-mode .cc-stats { display: flex; gap: 24px; flex-shrink: 0; }
+    .clients-grid.list-mode .cc-stats > div { display: flex; flex-direction: column; }
+    .clients-grid.list-mode .cc-ft { margin: 0; padding: 0; border: none; flex-shrink: 0; }
+    .clients-grid.list-mode .cc-ft span { display: none; }
 
-    .add-form input[type="text"] {
-      flex: 1;
-      min-width: 200px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
-      color: #1e3a5f;
-      font-size: 0.95rem;
-      padding: 0.75rem 1rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    /* ── STEP 4 ACCOUNT IN HEADER ────────────────── */
+    .cd-account-wrap {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 7px;
+      background: var(--main-bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0 8px; height: 26px;
     }
-
-    .add-form input[type="text"]:focus {
-      border-color: #1d4ed8;
-      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
-    }
-
-    .add-form input[type="text"]::placeholder {
-      color: #93b8d4;
-    }
-
-    .btn-add {
-      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 0.75rem 1.5rem;
-      transition: opacity 0.2s, transform 0.1s;
-      white-space: nowrap;
-    }
-
-    .btn-add:hover { opacity: 0.88; }
-    .btn-add:active { transform: scale(0.97); }
-
-    /* Filters */
-    .filters {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      background: #ffffff;
-      border: 1px solid #bfdbfe;
-      border-radius: 8px;
-      color: #5a85b0;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 0.4rem 0.9rem;
-      transition: all 0.15s;
-    }
-
-    .filter-btn:hover {
-      border-color: #1d4ed8;
-      color: #1d4ed8;
-    }
-
-    .filter-btn.active {
-      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-      border-color: transparent;
-      color: #fff;
-    }
-
-    /* Task list */
-    .task-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .task-item {
-      background: #ffffff;
-      border: 1px solid #bfdbfe;
-      border-radius: 13px;
-      padding: 1rem 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.06);
-      transition: box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
-      animation: slideIn 0.2s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .task-item:hover {
-      box-shadow: 0 4px 16px rgba(29, 78, 216, 0.12);
-      border-color: #93c5fd;
-    }
-
-    .task-item.done {
-      opacity: 0.55;
-    }
-
-    /* Checkbox */
-    .task-check {
+    .cd-account-select {
+      font-family: var(--font); font-size: 12px; color: var(--ts);
+      background: transparent; border: none; outline: none; cursor: pointer;
       appearance: none;
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #93c5fd;
-      border-radius: 6px;
-      cursor: pointer;
+      padding-right: 14px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0 center;
+      max-width: 220px;
+    }
+    .cd-account-select:focus { color: var(--accent); outline: none; }
+
+    /* ── SELECT ──────────────────────────────────── */
+    .form-select {
+      padding: 9px 34px 9px 12px;
+      border: 1px solid var(--border); border-radius: var(--rsm);
+      font-family: var(--font); font-size: 13px; color: var(--tp);
+      background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none; outline: none; cursor: pointer;
+    }
+
+    /* ── WIZARD VIEW ─────────────────────────────── */
+    #view-wizard {
+      flex-direction: row !important;
+      padding: 0;
+      overflow: hidden;
+      align-items: stretch;
+    }
+
+    .wz-steps-col {
+      width: 210px; min-width: 210px;
+      background: var(--main-bg);
+      border-right: none;
+      padding: 36px 22px 36px 24px;
+      display: flex; flex-direction: column;
       flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .wz-steps-title {
+      font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .7px;
+      color: var(--tt); margin-bottom: 28px;
+    }
+
+    .ps { cursor: pointer; }
+    .ps:hover .ps-circle { border-color: var(--accent); }
+    .ps:hover .ps-label  { color: var(--accent); }
+
+    .wz-content {
+      flex: 1; overflow-y: auto;
+      padding: 0 40px 36px;
+    }
+
+    .wz-container { width: 100%; padding-top: 36px; }
+
+    /* Vertical step items */
+    .ps {
+      display: flex; flex-direction: row; align-items: flex-start;
+      gap: 14px;
+    }
+
+    .ps-left {
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0;
+    }
+
+    .ps-circle {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12.5px; font-weight: 700;
+      border: 2px solid var(--border); background: var(--main-bg); color: var(--tt);
+      transition: all .3s; flex-shrink: 0;
+    }
+    .ps.done   .ps-circle { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .ps.active .ps-circle { border-color: var(--accent); color: var(--accent); background: var(--card); box-shadow: 0 0 0 3px var(--accent-light); }
+
+    .pl {
+      width: 2px; height: 40px;
+      background: var(--border);
+      margin: 4px 0 4px 0;
+      transition: background .4s; flex-shrink: 0;
+    }
+    .pl.done { background: var(--accent); }
+
+    .ps-right { flex: 1; min-width: 0; padding-top: 5px; padding-bottom: 8px; }
+    .ps-label { font-size: 13px; font-weight: 500; color: var(--tt); }
+    .ps.active .ps-label { color: var(--accent); font-weight: 700; }
+    .ps.done   .ps-label { color: var(--ts); font-weight: 500; }
+    .ps-desc   { font-size: 11px; color: var(--tt); margin-top: 3px; line-height: 1.4; }
+    .ps.active .ps-desc { color: var(--ts); }
+    .ps.done   .ps-desc { color: var(--tt); }
+
+    /* Wizard steps */
+    .wz-step { display: none; }
+    .wz-step.active { display: block; }
+
+    /* Wizard card */
+    .wz-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 36px;
+      box-shadow: var(--sh-md);
+      max-width: 780px;
+    }
+    .wz-card-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .wz-card-sub   { font-size: 14px; color: var(--ts); margin-bottom: 28px; }
+
+    /* Form */
+    .fg { margin-bottom: 20px; }
+    .fl { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; }
+    .fl span { font-weight: 400; color: var(--tt); }
+    .fi, .fta {
+      width: 100%; padding: 10px 14px;
+      border: 1px solid var(--border); border-radius: var(--rsm);
+      font-family: var(--font); font-size: 13.5px; color: var(--tp);
+      background: var(--card); outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .fi:focus, .fta:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .fta { resize: vertical; min-height: 100px; }
+
+    .fi-sel {
+      width: 100%; padding: 10px 34px 10px 14px;
+      border: 1px solid var(--border); border-radius: var(--rsm);
+      font-family: var(--font); font-size: 13.5px; color: var(--tp);
+      background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none; outline: none; cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .fi-sel:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed var(--border); border-radius: var(--r);
+      padding: 36px; text-align: center;
+      cursor: pointer; transition: all .2s;
+    }
+    .dropzone:hover, .dropzone.drag-over { border-color: var(--accent); background: var(--accent-light); }
+    .dz-icon  { font-size: 38px; margin-bottom: 10px; }
+    .dz-title { font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
+    .dz-sub   { font-size: 12.5px; color: var(--tt); }
+
+    .file-list { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .file-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--accent-light); border: 1px solid rgba(0,99,232,.2);
+      border-radius: 6px; padding: 4px 10px;
+      font-size: 12.5px; color: var(--accent-dark); font-weight: 500;
+    }
+    .fc-rm { cursor: pointer; opacity: .6; font-size: 15px; line-height: 1; }
+    .fc-rm:hover { opacity: 1; }
+
+    .wz-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);
+    }
+
+    /* ── AI LOADING ──────────────────────────────── */
+    .ai-loading { text-align: center; padding: 56px 40px; }
+
+    .ai-spinner { width: 72px; height: 72px; margin: 0 auto 28px; position: relative; }
+    .ai-ring {
+      width: 72px; height: 72px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .85s linear infinite;
+    }
+    .ai-ring2 {
+      position: absolute; inset: 10px;
+      border: 3px solid transparent; border-top-color: rgba(0,99,232,.3);
+      border-radius: 50%; animation: spin 1.4s linear infinite reverse;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .ai-title    { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .ai-subtitle { font-size: 14px; color: var(--ts); margin-bottom: 36px; }
+
+    .ai-steps { text-align: left; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+    .ai-si {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-radius: var(--rsm);
+      background: #F8FAFC; border: 1px solid var(--border);
+      transition: all .4s;
+    }
+    .ai-si.running { background: var(--accent-light); border-color: rgba(0,99,232,.25); }
+    .ai-si.done    { background: #ECFDF5; border-color: rgba(16,185,129,.25); }
+
+    .ai-si-ic {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+      background: #E2E8F0; color: var(--tt); transition: all .3s;
+    }
+    .ai-si.running .ai-si-ic { background: var(--accent); color: #fff; animation: pulse 1s ease-in-out infinite; }
+    .ai-si.done    .ai-si-ic { background: var(--success); color: #fff; animation: none; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.55; } }
+
+    .ai-si-txt { font-size: 13.5px; font-weight: 500; }
+
+    /* ── VARIANTS ────────────────────────────────── */
+    .variants-hd { text-align: center; margin-bottom: 28px; }
+    .variants-hd h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .variants-hd p  { font-size: 14px; color: var(--ts); }
+
+    .variants-grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px; padding-top: 14px;
+    }
+
+    .vc {
+      background: var(--card); border: 2px solid var(--border);
+      border-radius: var(--r); padding: 24px;
+      box-shadow: var(--sh-sm); cursor: pointer;
+      transition: all .25s;
+      display: flex; flex-direction: column;
       position: relative;
-      transition: background 0.15s, border-color 0.15s;
     }
+    .vc:hover    { box-shadow: var(--sh-lg); border-color: var(--accent); transform: translateY(-4px); }
+    .vc.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light), var(--sh-md); }
 
-    .task-check:checked {
-      background: linear-gradient(135deg, #1d4ed8, #38bdf8);
-      border-color: transparent;
-    }
-
-    .task-check:checked::after {
-      content: '✓';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .task-text {
-      flex: 1;
-      font-size: 0.97rem;
-      color: #1e3a5f;
-      line-height: 1.4;
-      transition: color 0.2s;
-    }
-
-    .task-item.done .task-text {
-      text-decoration: line-through;
-      color: #93b8d4;
-    }
-
-    .task-date {
-      font-size: 0.75rem;
-      color: #93b8d4;
+    .vc-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #fff;
+      font-size: 10.5px; font-weight: 700;
+      padding: 3px 14px; border-radius: 20px; letter-spacing: .4px;
       white-space: nowrap;
     }
 
-    .btn-delete {
-      background: none;
-      border: none;
-      color: #bfdbfe;
-      cursor: pointer;
-      font-size: 1.1rem;
-      line-height: 1;
-      padding: 0.2rem 0.3rem;
-      border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
-      flex-shrink: 0;
+    .vc-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; }
+    .vc-name { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .vc-desc { font-size: 13px; color: var(--ts); margin-bottom: 16px; line-height: 1.5; }
+
+    .vc-types { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 18px; }
+    .type-tag { padding: 3px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 600; background: var(--accent-light); color: var(--accent-dark); }
+
+    .vc-camps-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--tt); margin-bottom: 8px; }
+    .vc-camp-row  { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .vc-camp-row:last-child { border-bottom: none; }
+    .vc-camp-row span:first-child { font-size: 13px; }
+
+    .vc-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .vm-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; font-weight: 600; color: var(--tt); }
+    .vm-val { font-size: 13.5px; font-weight: 700; margin-top: 2px; }
+
+    .vc .btn { margin-top: auto; width: 100%; justify-content: center; }
+
+    .variants-back { text-align: center; margin-top: 24px; }
+
+    /* ── CAMPAIGN DETAIL ─────────────────────────── */
+    .cd-header {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.10); margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px;
+      position: sticky; top: 0; z-index: 50;
+      max-width: 1000px;
+    }
+    .cd-back-btn {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--main-bg); cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: var(--ts); flex-shrink: 0;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .cd-back-btn:hover { background: var(--border); color: var(--tp); border-color: var(--ts); }
+    .cd-left { flex: 1; min-width: 0; }
+    .cd-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cd-meta { font-size: 12px; color: var(--ts); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cd-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+
+    .camps-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .ci {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden; box-shadow: var(--sh-sm);
     }
 
-    .btn-delete:hover {
-      color: #ef4444;
-      background: #fee2e2;
+    .ci-hd {
+      padding: 15px 20px; display: flex; align-items: center; gap: 14px;
+      cursor: pointer; transition: background .15s;
+    }
+    .ci-hd:hover { background: #F8FAFC; }
+
+    .ci-ico {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
     }
 
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: #93b8d4;
+    .ci-name { font-size: 14px; font-weight: 600; }
+    .ci-type { font-size: 12px; color: var(--tt); margin-top: 2px; }
+
+    .ci-chev { margin-left: auto; color: var(--tt); transition: transform .2s; flex-shrink: 0; }
+    .ci.open .ci-chev { transform: rotate(180deg); }
+
+    .ci-body {
+      display: none; padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .ci.open .ci-body { display: block; }
+
+    .ci-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+
+    .ci-lbl { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--ts); }
+
+    .tgt-section { margin-top: 16px; }
+    .tgt-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--tt); margin-bottom: 8px; }
+    .tgt-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tgt-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 12px; font-weight: 500;
+      color: var(--ts); background: #F8FAFC;
+      cursor: pointer; transition: all .15s;
+    }
+    .tgt-pill:hover, .tgt-pill.on { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-light); }
+    .tgt-pill-add { color: var(--tt); border-style: dashed; }
+    .tgt-pill-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* ── SETTINGS ────────────────────────────────── */
+    .settings-wrap { padding: 24px 32px 32px; flex: 1; }
+    .set-sec { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; box-shadow: var(--sh-sm); margin-bottom: 20px; }
+    .set-sec-title { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 700; background: #F8FAFC; }
+    .set-row { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .set-row:last-child { border-bottom: none; }
+    .set-row-lbl { font-size: 13.5px; font-weight: 500; }
+    .set-row-sub { font-size: 12px; color: var(--tt); margin-top: 2px; }
+
+    /* Toggle */
+    .tgl { position: relative; width: 44px; height: 24px; flex-shrink: 0; cursor: pointer; display: inline-block; }
+    .tgl input { opacity: 0; width: 0; height: 0; }
+    .tgl-sl { position: absolute; inset: 0; background: #CBD5E1; border-radius: 24px; transition: .3s; }
+    .tgl-sl::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+    .tgl input:checked + .tgl-sl { background: var(--accent); }
+    .tgl input:checked + .tgl-sl::before { transform: translateX(20px); }
+
+    /* ── TOAST ───────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1E293B; color: #fff;
+      padding: 13px 18px; border-radius: var(--rsm);
+      font-size: 13.5px; font-weight: 500;
+      box-shadow: var(--sh-lg); z-index: 9999;
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(100px); opacity: 0;
+      transition: all .35s cubic-bezier(.34,1.56,.64,1);
+      max-width: 340px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── SCROLLBAR ───────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* ── AUTOFILL ────────────────────────────────── */
+    @keyframes autofill-in {
+      0%   { background: var(--accent-light); box-shadow: 0 0 0 3px var(--accent-light); }
+      100% { background: var(--card);         box-shadow: none; }
+    }
+    .autofilled { animation: autofill-in 1.8s ease-out forwards; border-color: var(--accent) !important; }
+
+    .autofill-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--accent-light); color: var(--accent-dark);
+      border: 1px solid rgba(0,99,232,.2);
+      font-size: 10.5px; font-weight: 600;
+      padding: 2px 7px; border-radius: 20px;
+      vertical-align: middle; margin-left: 4px;
+      animation: autofill-in 1.8s ease-out forwards;
     }
 
-    .empty-state .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 0.75rem;
+    /* ── DZ ANALYZING ────────────────────────────── */
+    .dz-analyzing {
+      margin-top: 12px;
+      background: var(--accent-light);
+      border: 1px solid rgba(0,99,232,.18);
+      border-radius: var(--rsm);
+      padding: 12px 16px;
+    }
+    .dza-steps { display: flex; flex-direction: column; gap: 7px; }
+    .dza-step {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12.5px; font-weight: 500; color: var(--ts);
+      transition: color .3s;
+    }
+    .dza-step.done  { color: var(--success); }
+    .dza-step.active { color: var(--accent-dark); font-weight: 600; }
+
+    .dza-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--border); flex-shrink: 0; transition: background .3s;
+    }
+    .dza-dot.running { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+    .dza-dot.done    { background: var(--success); animation: none; }
+
+    /* ── AI ASSIST PANEL ─────────────────────────── */
+    .ai-assist-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, var(--accent), #3D8EF5);
+      color: #fff; border: none; border-radius: var(--rsm);
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: opacity .2s, transform .15s;
+      box-shadow: 0 2px 8px rgba(0,99,232,.3);
+    }
+    .ai-assist-btn:hover  { opacity: .88; }
+    .ai-assist-btn:active { transform: scale(.97); }
+    .ai-assist-btn svg { flex-shrink: 0; }
+
+    .ai-panel {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid rgba(0,99,232,.2);
+      border-radius: var(--r);
+      background: linear-gradient(135deg, #F0F6FF 0%, #F8FAFF 100%);
+      overflow: hidden;
+    }
+    .ai-panel.open { display: block; animation: panelIn .25s ease; }
+    @keyframes panelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+    .ai-panel-hd {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border-bottom: 1px solid rgba(0,99,232,.12);
+      font-size: 13px; font-weight: 700; color: var(--accent-dark);
+    }
+    .ai-panel-hd-icon {
+      width: 26px; height: 26px; border-radius: 7px;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #fff; flex-shrink: 0;
     }
 
-    .empty-state p {
-      font-size: 0.95rem;
-    }
+    .ai-panel-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* Clear all button */
-    .actions-bar {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 0.75rem;
-    }
+    .ai-sugg-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--tt); margin-bottom: 8px; }
 
-    .btn-clear {
-      background: none;
-      border: 1px solid #bfdbfe;
-      border-radius: 8px;
-      color: #5a85b0;
-      cursor: pointer;
-      font-size: 0.82rem;
-      padding: 0.35rem 0.85rem;
-      transition: all 0.15s;
+    .ai-sugg-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 8px 12px;
+      background: #fff; border: 1px solid rgba(0,99,232,.12);
+      border-radius: var(--rsm);
+      margin-bottom: 6px;
     }
+    .ai-sugg-row:last-child { margin-bottom: 0; }
+    .ai-sugg-content { flex: 1; min-width: 0; }
+    .ai-sugg-title { font-size: 13px; font-weight: 600; color: var(--tp); }
+    .ai-sugg-desc  { font-size: 11.5px; color: var(--ts); margin-top: 2px; }
+    .ai-sugg-apply {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border-radius: 6px; flex-shrink: 0;
+      background: var(--accent-light); color: var(--accent-dark);
+      border: 1px solid rgba(0,99,232,.2);
+      font-family: var(--font); font-size: 11.5px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: background .15s;
+    }
+    .ai-sugg-apply:hover { background: rgba(0,99,232,.18); }
+    .ai-sugg-apply.applied { background: #ECFDF5; color: #059669; border-color: rgba(16,185,129,.25); pointer-events: none; }
 
-    .btn-clear:hover {
-      border-color: #ef4444;
-      color: #ef4444;
+    .ai-kw-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ai-kw-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 6px;
+      background: #fff; border: 1px dashed rgba(0,99,232,.3);
+      font-size: 12px; font-weight: 500; color: var(--accent-dark);
+      cursor: pointer; transition: all .15s;
     }
+    .ai-kw-pill:hover { background: var(--accent-light); border-style: solid; }
+    .ai-kw-pill.added { background: var(--accent-light); border-style: solid; border-color: rgba(0,99,232,.4); }
+
+    .ai-tips { display: flex; flex-direction: column; gap: 6px; }
+    .ai-tip {
+      display: flex; gap: 8px; align-items: flex-start;
+      font-size: 12.5px; color: var(--ts); line-height: 1.45;
+    }
+    .ai-tip-bullet { color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── MISC ────────────────────────────────────── */
+    .fw700 { font-weight: 700; }
+    .tc-muted { color: var(--ts); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Planováč</h1>
-      <p>Organizuj své úkoly jednoduše a přehledně. ✓</p>
-    </header>
 
-    <!-- Stats -->
-    <div class="stats">
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<aside id="sidebar">
+
+  <div class="sb-logo">
+    <div class="sb-logo-icon">
+      <span style="font-size:19px;font-weight:800;color:#fff;font-family:var(--font);letter-spacing:-1px;line-height:1">S</span>
+    </div>
+    <div>
+      <div class="sb-logo-name">Sklik AI Agent</div>
+      <div class="sb-logo-sub">Automatizace kampaní</div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <button class="sb-new-btn" onclick="startNewCampaign()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nová reklamní kampaň
+    </button>
+
+    <button class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+
+    <div class="sb-sep"></div>
+
+    <button class="nav-item" id="nav-klienti" onclick="showView('klienti')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Klienti
+      <span class="nav-badge">6</span>
+    </button>
+
+    <button class="nav-item" id="nav-kampane" onclick="showView('kampane')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Kampaně
+      <span class="nav-badge">12</span>
+    </button>
+
+    <div style="flex:1"></div>
+
+    <button class="nav-item" id="nav-nastaveni" onclick="showView('nastaveni')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Nastavení
+    </button>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="user-row">
+      <div class="user-av">JP</div>
+      <div>
+        <div class="user-name">Jan Procházka</div>
+        <div class="user-role">Sklik Optimalizátor</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<main id="main">
+
+  <!-- ── DASHBOARD ── -->
+  <div class="view active" id="view-dashboard">
+    <div class="ph">
+      <div>
+        <div class="ph-title">Dashboard</div>
+        <div class="ph-sub">Přehled aktivních kampaní a výkonu vašeho portfolia</div>
+      </div>
+      <div class="ph-actions">
+        <span style="font-size:12.5px;color:var(--tt)">Čt 19. března 2026</span>
+        <button class="btn btn-primary btn-sm" onclick="startNewCampaign()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nová reklamní kampaň
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-number" id="statTotal">0</div>
-        <div class="stat-label">Celkem</div>
+        <div class="stat-top">
+          <div class="stat-label">Aktivní kampaně</div>
+          <div class="stat-icon" style="background:#E6F0FF">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0063E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">24</div>
+        <div class="stat-delta up">↑ 4 nové tento měsíc</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="statPending">0</div>
-        <div class="stat-label">Zbývá</div>
+        <div class="stat-top">
+          <div class="stat-label">Klientů celkem</div>
+          <div class="stat-icon" style="background:#EFF6FF">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">6</div>
+        <div class="stat-delta">2 noví za kvartál</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="statDone">0</div>
-        <div class="stat-label">Hotovo</div>
+        <div class="stat-top">
+          <div class="stat-label">Měsíční výdaje</div>
+          <div class="stat-icon" style="background:#ECFDF5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">148 tis.</div>
+        <div class="stat-delta up">↑ 12 % vs. minulý měsíc</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-label">Průměrné CTR</div>
+          <div class="stat-icon" style="background:#FEF2F2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-value">3.8 %</div>
+        <div class="stat-delta up">↑ 0.4 % vs. minulý měsíc</div>
       </div>
     </div>
 
-    <!-- Add task -->
-    <div class="add-form">
-      <h2>Nový úkol</h2>
-      <div class="form-row">
-        <input type="text" id="taskInput" placeholder="Co je potřeba udělat?" />
-        <button class="btn-add" onclick="addTask()">Přidat</button>
+    <div class="section">
+      <div class="sec-hd">
+        <div class="sec-title">Poslední kampaně</div>
+        <button class="btn btn-ghost btn-sm" onclick="showView('kampane')">Zobrazit vše</button>
       </div>
-    </div>
-
-    <!-- Filters + clear -->
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Vše</button>
-      <button class="filter-btn" data-filter="pending" onclick="setFilter('pending', this)">Zbývající</button>
-      <button class="filter-btn" data-filter="done" onclick="setFilter('done', this)">Hotové</button>
-    </div>
-
-    <div class="actions-bar">
-      <button class="btn-clear" onclick="clearDone()">Smazat hotové</button>
-    </div>
-
-    <!-- Task list -->
-    <div class="task-list" id="taskList">
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <p>Zatím žádné úkoly. Přidej první!</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Klient</th>
+              <th>Kampaň</th>
+              <th>Typ</th>
+              <th>Status</th>
+              <th>Denní rozpočet</th>
+              <th>CTR</th>
+              <th>Spuštěno</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-dashboard"></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <script>
-    let tasks = JSON.parse(localStorage.getItem('planovac-tasks') || '[]');
-    let currentFilter = 'all';
-
-    function saveTasks() {
-      localStorage.setItem('planovac-tasks', JSON.stringify(tasks));
-    }
-
-    function formatDate() {
-      const now = new Date();
-      return now.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-    }
-
-    function addTask() {
-      const input = document.getElementById('taskInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      tasks.unshift({ id: Date.now(), text, done: false, date: formatDate() });
-      saveTasks();
-      renderTasks();
-      input.value = '';
-      input.focus();
-    }
-
-    function toggleTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (task) { task.done = !task.done; saveTasks(); renderTasks(); }
-    }
-
-    function deleteTask(id) {
-      tasks = tasks.filter(t => t.id !== id);
-      saveTasks();
-      renderTasks();
-    }
-
-    function clearDone() {
-      tasks = tasks.filter(t => !t.done);
-      saveTasks();
-      renderTasks();
-    }
-
-    function setFilter(filter, btn) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderTasks();
-    }
-
-    function renderTasks() {
-      const list = document.getElementById('taskList');
-      const filtered = tasks.filter(t => {
-        if (currentFilter === 'pending') return !t.done;
-        if (currentFilter === 'done') return t.done;
-        return true;
-      });
-
-      // Update stats
-      document.getElementById('statTotal').textContent = tasks.length;
-      document.getElementById('statPending').textContent = tasks.filter(t => !t.done).length;
-      document.getElementById('statDone').textContent = tasks.filter(t => t.done).length;
-
-      if (filtered.length === 0) {
-        const msg = currentFilter === 'done'
-          ? 'Žádné dokončené úkoly.'
-          : currentFilter === 'pending'
-          ? 'Všechny úkoly jsou hotové!'
-          : 'Zatím žádné úkoly. Přidej první!';
-        list.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>${msg}</p></div>`;
-        return;
-      }
-
-      list.innerHTML = filtered.map(task => `
-        <div class="task-item ${task.done ? 'done' : ''}">
-          <input type="checkbox" class="task-check" ${task.done ? 'checked' : ''} onchange="toggleTask(${task.id})" />
-          <span class="task-text">${escapeHtml(task.text)}</span>
-          <span class="task-date">${task.date}</span>
-          <button class="btn-delete" onclick="deleteTask(${task.id})" title="Smazat">✕</button>
+  <!-- ── KLIENTI ── -->
+  <div class="view" id="view-klienti">
+    <div class="ph">
+      <div>
+        <div class="ph-title">Klienti</div>
+        <div class="ph-sub">Správa klientského portfolia</div>
+      </div>
+      <div class="ph-actions">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Hledat klienta…" />
         </div>
-      `).join('');
+        <div class="view-toggle">
+          <button class="vt-btn active" id="vt-grid" title="Karty" onclick="setClientsView('grid')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </button>
+          <button class="vt-btn" id="vt-list" title="Seznam" onclick="setClientsView('list')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+        </div>
+        <button class="btn btn-primary btn-sm">+ Přidat klienta</button>
+      </div>
+    </div>
+    <div class="section" style="padding-top:24px">
+      <div class="clients-grid" id="clients-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── KAMPANĚ ── -->
+  <div class="view" id="view-kampane">
+    <div class="ph">
+      <div>
+        <div class="ph-title">Kampaně</div>
+        <div class="ph-sub">Historie a správa všech kampaní</div>
+      </div>
+      <div class="ph-actions">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Hledat kampaň…" />
+        </div>
+        <select class="form-select">
+          <option>Všechny typy</option>
+          <option>Textová</option>
+          <option>Produktová</option>
+          <option>Display</option>
+          <option>Retargeting</option>
+          <option>Video</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="startNewCampaign()">+ Nová reklamní kampaň</button>
+      </div>
+    </div>
+    <div class="section" style="padding-top:24px">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Klient</th>
+              <th>Název kampaně</th>
+              <th>Typ</th>
+              <th>Status</th>
+              <th>Denní rozpočet</th>
+              <th>CTR</th>
+              <th>Konverze</th>
+              <th>Spuštěno</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbl-kampane"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── WIZARD ── -->
+  <div class="view" id="view-wizard">
+
+    <!-- Left: vertical steps column -->
+    <div class="wz-steps-col">
+      <div class="wz-steps-title">Postup vytvoření</div>
+
+      <div class="ps active" id="ps-1" onclick="goToStep(1)">
+        <div class="ps-left">
+          <div class="ps-circle" id="pc-1">1</div>
+          <div class="pl" id="pl-1"></div>
+        </div>
+        <div class="ps-right">
+          <div class="ps-label">Podklady</div>
+          <div class="ps-desc">Nahrajte brief a materiály klienta</div>
+        </div>
+      </div>
+
+      <div class="ps" id="ps-2" onclick="goToStep(2)">
+        <div class="ps-left">
+          <div class="ps-circle" id="pc-2">2</div>
+          <div class="pl" id="pl-2"></div>
+        </div>
+        <div class="ps-right">
+          <div class="ps-label">Analýza AI</div>
+          <div class="ps-desc">AI zpracuje podklady a navrhne přístup</div>
+        </div>
+      </div>
+
+      <div class="ps" id="ps-3" onclick="goToStep(3)">
+        <div class="ps-left">
+          <div class="ps-circle" id="pc-3">3</div>
+          <div class="pl" id="pl-3"></div>
+        </div>
+        <div class="ps-right">
+          <div class="ps-label">Strategie</div>
+          <div class="ps-desc">Vyberte reklamní strategii ze 3 variant</div>
+        </div>
+      </div>
+
+      <div class="ps" id="ps-4" onclick="goToStep(4)">
+        <div class="ps-left">
+          <div class="ps-circle" id="pc-4">4</div>
+        </div>
+        <div class="ps-right">
+          <div class="ps-label">Kampaně</div>
+          <div class="ps-desc">Upravte nastavení a spusťte</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: step content -->
+    <div class="wz-content" id="wz-content">
+    <div class="wz-container">
+
+      <!-- STEP 1 — Upload -->
+      <div class="wz-step active" id="wz-s1">
+        <div class="wz-card">
+          <div class="wz-card-title">Podklady klienta</div>
+          <div class="wz-card-sub">Začněte nahráním podkladů — brief, obrázky, videa nebo logo. AI automaticky předvyplní zbývající pole.</div>
+
+          <div class="fg">
+            <label class="fl">Podklady <span>(obrázky, videa, loga, bannery, PDF brief…)</span></label>
+            <div class="dropzone" id="dropzone"
+                 onclick="document.getElementById('file-input').click()"
+                 ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
+              <div class="dz-icon">📁</div>
+              <div class="dz-title">Přetáhněte soubory sem nebo klikněte pro výběr</div>
+              <div class="dz-sub">Podporované formáty: JPG, PNG, GIF, MP4, PDF, DOCX · Max 50 MB na soubor</div>
+            </div>
+            <input type="file" id="file-input" multiple style="display:none" onchange="fileSelect(event)" />
+            <div class="file-list" id="file-list"></div>
+
+            <!-- Analyzing indicator -->
+            <div class="dz-analyzing" id="dz-analyzing" style="display:none">
+              <div class="dza-steps">
+                <div class="dza-step" id="dza-0"><span class="dza-dot running"></span><span>Čtu nahrané soubory…</span></div>
+                <div class="dza-step" id="dza-1"><span class="dza-dot"></span><span>Identifikuji klienta a web…</span></div>
+                <div class="dza-step" id="dza-2"><span class="dza-dot"></span><span>Extrahuji klíčové informace…</span></div>
+                <div class="dza-step" id="dza-3"><span class="dza-dot"></span><span>Předvyplňuji formulář…</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="fg">
+              <label class="fl">Klient <span id="lbl-client-badge"></span></label>
+              <select class="fi-sel" id="wz-client">
+                <option value="">— Vyberte klienta —</option>
+                <option>Alza.cz</option>
+                <option>Sportisimo</option>
+                <option>Kasa.cz</option>
+                <option>ČSOB Pojišťovna</option>
+                <option>Rohlik.cz</option>
+                <option>Notino.cz</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label class="fl">Cílová URL <span id="lbl-url-badge"></span></label>
+              <input type="url" class="fi" id="wz-url" placeholder="https://www.klient.cz" />
+            </div>
+          </div>
+
+          <div class="fg">
+            <label class="fl">Brief klienta <span>(cíle, produkty, cílová skupina, sezonalita…)</span> <span id="lbl-brief-badge"></span></label>
+            <textarea class="fta" id="wz-brief" placeholder="Pole se předvyplní po nahrání podkladů, nebo napište brief ručně…"></textarea>
+          </div>
+
+          <div class="fg">
+            <label class="fl">Měsíční rozpočet <span>(Kč)</span> <span id="lbl-budget-badge"></span></label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <input type="number" class="fi" id="wz-budget-min" placeholder="Min." />
+              <input type="number" class="fi" id="wz-budget-max" placeholder="Max." />
+            </div>
+          </div>
+
+          <div class="wz-actions">
+            <button class="btn btn-ghost" onclick="showView('dashboard')">Zrušit</button>
+            <button class="btn btn-primary btn-lg" onclick="startAnalysis()">
+              Analyzovat
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 — AI Analysis -->
+      <div class="wz-step" id="wz-s2">
+        <div class="wz-card">
+          <div class="ai-loading">
+            <div class="ai-spinner">
+              <div class="ai-ring"></div>
+              <div class="ai-ring2"></div>
+            </div>
+            <div class="ai-title">AI analyzuje podklady</div>
+            <div class="ai-subtitle">Probíhá analýza brifu a příprava reklamních strategií pro Sklik…</div>
+            <div class="ai-steps">
+              <div class="ai-si running" id="ai-0">
+                <div class="ai-si-ic">⚡</div>
+                <div class="ai-si-txt">Analyzuji brief klienta…</div>
+              </div>
+              <div class="ai-si pending" id="ai-1">
+                <div class="ai-si-ic">🔗</div>
+                <div class="ai-si-txt">Kontroluji cílovou URL a obsah webu…</div>
+              </div>
+              <div class="ai-si pending" id="ai-2">
+                <div class="ai-si-ic">🎯</div>
+                <div class="ai-si-txt">Identifikuji cílovou skupinu a klíčová slova…</div>
+              </div>
+              <div class="ai-si pending" id="ai-3">
+                <div class="ai-si-ic">📊</div>
+                <div class="ai-si-txt">Navrhuji 3 reklamní strategie pro Sklik…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 — Variants -->
+      <div class="wz-step" id="wz-s3">
+        <div class="variants-hd">
+          <h2>Zvolte reklamní strategii</h2>
+          <p>AI navrhla 3 varianty přizpůsobené klientovi Rohlik.cz. Vyberte jednu pro další úpravy.</p>
+        </div>
+
+        <div class="variants-grid">
+
+          <!-- Variant A — Performance -->
+          <div class="vc" onclick="selectVariant('perf')">
+            <div class="vc-icon" style="background:#FFF0E6">🚀</div>
+            <div class="vc-name">Výkonnostní</div>
+            <div class="vc-desc">Maximalizace konverzí a ROAS. Zaměřena na uživatele s vysokou kupní intencí připravené k nákupu.</div>
+            <div class="vc-types">
+              <span class="type-tag">Textová</span>
+              <span class="type-tag">Produktová</span>
+              <span class="type-tag">Remarketing</span>
+            </div>
+            <div style="margin-bottom:14px">
+              <div class="vc-camps-lbl">Kampaně v strategii</div>
+              <div class="vc-camp-row"><span>📝</span><span>Textová — Brandové vyhledávání</span></div>
+              <div class="vc-camp-row"><span>📝</span><span>Textová — Generické vyhledávání</span></div>
+              <div class="vc-camp-row"><span>🛍️</span><span>Produktová — Smart Shopping</span></div>
+              <div class="vc-camp-row"><span>🔄</span><span>Retargeting — Dynamický</span></div>
+            </div>
+            <div class="vc-metrics">
+              <div><div class="vm-lbl">Odhadovaný dosah</div><div class="vm-val">180–240 tis./měs.</div></div>
+              <div><div class="vm-lbl">Doporučený rozpočet</div><div class="vm-val">45–65 tis. Kč</div></div>
+              <div><div class="vm-lbl">Očekávané CTR</div><div class="vm-val">3.2–4.8 %</div></div>
+              <div><div class="vm-lbl">Očekávané CPA</div><div class="vm-val">180–260 Kč</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="selectVariant('perf');event.stopPropagation()">Vybrat strategii</button>
+          </div>
+
+          <!-- Variant B — Mix (recommended) -->
+          <div class="vc" id="vc-mix" onclick="selectVariant('mix')">
+            <div class="vc-badge">⭐ Doporučeno</div>
+            <div class="vc-icon" style="background:#EFF6FF">🌐</div>
+            <div class="vc-name">Kompletní mix</div>
+            <div class="vc-desc">Pokrývá celý zákaznický trychtýř — od povědomí po konverzi. Nejkomplexnější a nejefektivnější přístup.</div>
+            <div class="vc-types">
+              <span class="type-tag">Textová</span>
+              <span class="type-tag">Produktová</span>
+              <span class="type-tag">Display</span>
+              <span class="type-tag">Retargeting</span>
+            </div>
+            <div style="margin-bottom:14px">
+              <div class="vc-camps-lbl">Kampaně v strategii</div>
+              <div class="vc-camp-row"><span>📝</span><span>Textová — Brandová + Generická</span></div>
+              <div class="vc-camp-row"><span>🛍️</span><span>Produktová — Shopping</span></div>
+              <div class="vc-camp-row"><span>🖼️</span><span>Display — Povědomí o značce</span></div>
+              <div class="vc-camp-row"><span>🖼️</span><span>Display — Retargeting</span></div>
+              <div class="vc-camp-row"><span>🔄</span><span>Dynamický retargeting</span></div>
+            </div>
+            <div class="vc-metrics">
+              <div><div class="vm-lbl">Odhadovaný dosah</div><div class="vm-val">320–480 tis./měs.</div></div>
+              <div><div class="vm-lbl">Doporučený rozpočet</div><div class="vm-val">55–80 tis. Kč</div></div>
+              <div><div class="vm-lbl">Očekávané CTR</div><div class="vm-val">2.8–4.2 %</div></div>
+              <div><div class="vm-lbl">Očekávané CPA</div><div class="vm-val">210–290 Kč</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="selectVariant('mix');event.stopPropagation()">Vybrat strategii</button>
+          </div>
+
+          <!-- Variant C — Brand -->
+          <div class="vc" onclick="selectVariant('brand')">
+            <div class="vc-icon" style="background:#F0FDF4">📣</div>
+            <div class="vc-name">Brandová</div>
+            <div class="vc-desc">Budování povědomí o značce a oslovení nového publika pomocí vizuálních a video formátů.</div>
+            <div class="vc-types">
+              <span class="type-tag">Display</span>
+              <span class="type-tag">Obsahová</span>
+              <span class="type-tag">Video</span>
+            </div>
+            <div style="margin-bottom:14px">
+              <div class="vc-camps-lbl">Kampaně v strategii</div>
+              <div class="vc-camp-row"><span>🖼️</span><span>Display — Povědomí o značce</span></div>
+              <div class="vc-camp-row"><span>📄</span><span>Obsahová — Zájmy a témata</span></div>
+              <div class="vc-camp-row"><span>▶️</span><span>Video — YouTube/Sklik</span></div>
+              <div class="vc-camp-row"><span>📝</span><span>Textová — Brandová</span></div>
+            </div>
+            <div class="vc-metrics">
+              <div><div class="vm-lbl">Odhadovaný dosah</div><div class="vm-val">550–800 tis./měs.</div></div>
+              <div><div class="vm-lbl">Doporučený rozpočet</div><div class="vm-val">40–70 tis. Kč</div></div>
+              <div><div class="vm-lbl">Očekávané CTR</div><div class="vm-val">0.8–1.6 %</div></div>
+              <div><div class="vm-lbl">Očekávané CPA</div><div class="vm-val">320–480 Kč</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="selectVariant('brand');event.stopPropagation()">Vybrat strategii</button>
+          </div>
+
+        </div>
+
+        <div class="variants-back">
+          <button class="btn btn-ghost" onclick="goToStep(1)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Zpět k podkladům
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4 — Campaign Detail -->
+      <div class="wz-step" id="wz-s4">
+        <div class="cd-header">
+          <button class="cd-back-btn" onclick="goToStep(3)" title="Zpět na výběr strategie">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <div class="cd-left">
+            <div class="cd-name" id="cd-strategy-name">Kompletní mix</div>
+            <div class="cd-meta" id="cd-meta">Klient: Rohlik.cz · 5 kampaní · Doporučený rozpočet: 55–80 tis. Kč/měs.</div>
+            <div class="cd-account-wrap">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ts)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <select class="cd-account-select" id="s4-account-select">
+                <option value="">Vyberte Sklik účet…</option>
+              </select>
+            </div>
+          </div>
+          <div class="cd-actions">
+            <button class="btn btn-ghost" onclick="showToast('✅ Kampaně byly uloženy.')">
+              Uložit a zavřít
+            </button>
+            <button class="btn btn-ghost" onclick="showToast('📥 Stahování souboru campaign_export.xlsx…')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Stáhnout (.xlsx)
+            </button>
+            <button class="btn btn-primary" onclick="showToast('🚀 Kampaně byly úspěšně odeslány na Sklik!')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Spustit na Skliku
+            </button>
+          </div>
+        </div>
+
+        <div class="camps-list" id="camps-list"></div>
+      </div>
+
+    </div><!-- /wz-container -->
+    </div><!-- /wz-content -->
+  </div>
+
+  <!-- ── NASTAVENÍ ── -->
+  <div class="view" id="view-nastaveni">
+    <div class="ph">
+      <div>
+        <div class="ph-title">Nastavení</div>
+        <div class="ph-sub">Konfigurace aplikace a napojení na API</div>
+      </div>
+    </div>
+
+    <div class="settings-wrap">
+      <div class="set-sec">
+        <div class="set-sec-title">API připojení</div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">Sklik API klíč</div>
+            <div class="set-row-sub">Připojení k Sklik API pro spouštění kampaní</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="password" value="sk-live-••••••••••••••••" class="fi" style="width:240px" />
+            <button class="btn btn-secondary btn-sm">Uložit</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">OpenAI API klíč</div>
+            <div class="set-row-sub">Pro analýzu briefů a generování strategií</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="password" placeholder="sk-…" class="fi" style="width:240px" />
+            <button class="btn btn-secondary btn-sm">Uložit</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">Status připojení</div>
+            <div class="set-row-sub">Aktuální stav API integrace</div>
+          </div>
+          <span class="badge bg-warning"><span class="bd"></span>Čeká na konfiguraci</span>
+        </div>
+      </div>
+
+      <div class="set-sec">
+        <div class="set-sec-title">Výchozí nastavení kampaní</div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">Výchozí strategie nabídek</div>
+            <div class="set-row-sub">Použije se jako výchozí při tvorbě nových kampaní</div>
+          </div>
+          <select class="form-select">
+            <option>CPC — Cena za klik</option>
+            <option>CPA — Cena za konverzi</option>
+            <option>ROAS — Cílová hodnota konverze</option>
+            <option>CPM — Cena za tisíc zobrazení</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">Výchozí měna</div>
+          </div>
+          <select class="form-select">
+            <option>CZK — Česká koruna</option>
+            <option>EUR — Euro</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">Automatická pauza při překročení rozpočtu</div>
+            <div class="set-row-sub">Kampaň se automaticky pozastaví při 90 % čerpání</div>
+          </div>
+          <label class="tgl"><input type="checkbox" checked /><span class="tgl-sl"></span></label>
+        </div>
+      </div>
+
+      <div class="set-sec">
+        <div class="set-sec-title">Aplikace</div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">E-mailové notifikace</div>
+            <div class="set-row-sub">Denní přehled výkonu kampaní zaslaný na e-mail</div>
+          </div>
+          <label class="tgl"><input type="checkbox" /><span class="tgl-sl"></span></label>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-row-lbl">Tmavý režim</div>
+            <div class="set-row-sub">Tmavé rozhraní aplikace</div>
+          </div>
+          <label class="tgl"><input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)" /><span class="tgl-sl"></span></label>
+        </div>
+        <div class="set-row">
+          <div class="set-row-lbl">Verze aplikace</div>
+          <span style="font-size:13px;color:var(--tt)">v0.1.0 — Vizuální prototyp</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ── DATA ─────────────────────────────────────── */
+const CLIENTS = [
+  { id:1, name:'Alza.cz',        domain:'alza.cz',      color:'#E53E3E', init:'A', camps:8,  budget:'45 000 Kč', last:'12. 3. 2026', status:'active'  },
+  { id:2, name:'Sportisimo',     domain:'sportisimo.cz', color:'#38A169', init:'S', camps:5,  budget:'28 000 Kč', last:'8. 3. 2026',  status:'active'  },
+  { id:3, name:'Kasa.cz',        domain:'kasa.cz',       color:'#3182CE', init:'K', camps:3,  budget:'18 500 Kč', last:'15. 2. 2026', status:'paused'  },
+  { id:4, name:'ČSOB Pojišťovna',domain:'csobpoj.cz',    color:'#805AD5', init:'Č', camps:4,  budget:'62 000 Kč', last:'10. 3. 2026', status:'active'  },
+  { id:5, name:'Rohlik.cz',      domain:'rohlik.cz',     color:'#D69E2E', init:'R', camps:6,  budget:'35 000 Kč', last:'17. 3. 2026', status:'active'  },
+  { id:6, name:'Notino.cz',      domain:'notino.cz',     color:'#ED64A6', init:'N', camps:2,  budget:'22 000 Kč', last:'5. 3. 2026',  status:'paused'  },
+];
+
+const CAMPAIGNS = [
+  { client:'Alza.cz',         name:'Alza — Brandové vyhledávání',     type:'Textová',    status:'active', budget:'3 200 Kč',  ctr:'4.1 %', conv:'138', date:'1. 2. 2026'  },
+  { client:'Alza.cz',         name:'Alza — Generické vyhledávání',    type:'Textová',    status:'active', budget:'8 500 Kč',  ctr:'2.8 %', conv:'89',  date:'1. 2. 2026'  },
+  { client:'Alza.cz',         name:'Alza — Smart Shopping',           type:'Produktová', status:'active', budget:'12 000 Kč', ctr:'1.2 %', conv:'214', date:'5. 2. 2026'  },
+  { client:'Alza.cz',         name:'Alza — Dynamický remarketing',    type:'Retargeting',status:'active', budget:'4 500 Kč',  ctr:'3.4 %', conv:'198', date:'15. 2. 2026' },
+  { client:'Rohlik.cz',       name:'Rohlik — Brandová',               type:'Textová',    status:'active', budget:'2 800 Kč',  ctr:'5.3 %', conv:'94',  date:'10. 3. 2026' },
+  { client:'Rohlik.cz',       name:'Rohlik — Display povědomí',       type:'Display',    status:'active', budget:'6 000 Kč',  ctr:'0.9 %', conv:'31',  date:'12. 3. 2026' },
+  { client:'Rohlik.cz',       name:'Rohlik — Retargeting',            type:'Retargeting',status:'active', budget:'3 500 Kč',  ctr:'2.9 %', conv:'77',  date:'14. 3. 2026' },
+  { client:'Sportisimo',      name:'Sportisimo — Výprodej',           type:'Textová',    status:'active', budget:'5 500 Kč',  ctr:'3.6 %', conv:'67',  date:'20. 2. 2026' },
+  { client:'Sportisimo',      name:'Sportisimo — Display retargeting',type:'Display',    status:'paused', budget:'3 000 Kč',  ctr:'0.7 %', conv:'18',  date:'1. 3. 2026'  },
+  { client:'ČSOB Pojišťovna', name:'ČSOB — Pojistky obecné',          type:'Textová',    status:'active', budget:'14 000 Kč', ctr:'2.2 %', conv:'45',  date:'15. 1. 2026' },
+  { client:'Kasa.cz',         name:'Kasa — Smart Shopping',           type:'Produktová', status:'paused', budget:'7 200 Kč',  ctr:'1.5 %', conv:'62',  date:'10. 1. 2026' },
+  { client:'Notino.cz',       name:'Notino — Vyhledávání parfémů',    type:'Textová',    status:'active', budget:'4 100 Kč',  ctr:'3.9 %', conv:'51',  date:'25. 2. 2026' },
+];
+
+const VARIANT_CAMPS = {
+  perf: {
+    name: 'Výkonnostní strategie',
+    meta: 'Klient: Rohlik.cz · 4 kampaně · Doporučený rozpočet: 45–65 tis. Kč/měs.',
+    camps: [
+      { name:'Brandové vyhledávání',  type:'Textová kampaň',   ico:'📝', bg:'#E6F0FF', budget:'5000',  bid:'CPC',  kw:['Brandová klíčová slova','Přesná shoda'],      geo:['Praha','Brno','Ostrava'] },
+      { name:'Generické vyhledávání', type:'Textová kampaň',   ico:'📝', bg:'#E6F0FF', budget:'12000', bid:'CPC',  kw:['Generická klíčová slova','Modif. volná shoda'],geo:['Česká republika'] },
+      { name:'Smart Shopping',        type:'Produktová kampaň',ico:'🛍️', bg:'#EFF6FF', budget:'20000', bid:'ROAS', kw:['Všechny produkty','Nejprodávanější'],          geo:['Česká republika'] },
+      { name:'Dynamický retargeting', type:'Retargeting',      ico:'🔄', bg:'#F0FDF4', budget:'8000',  bid:'CPA',  kw:['Návštěvníci košíku','Prohlížeči produktů'],   geo:['Česká republika'] },
+    ]
+  },
+  mix: {
+    name: 'Kompletní mix strategie',
+    meta: 'Klient: Rohlik.cz · 5 kampaní · Doporučený rozpočet: 55–80 tis. Kč/měs.',
+    camps: [
+      { name:'Brandové vyhledávání',  type:'Textová kampaň',   ico:'📝', bg:'#E6F0FF', budget:'5000',  bid:'CPC',  kw:['Brandová klíčová slova'],                        geo:['Česká republika'] },
+      { name:'Generické vyhledávání', type:'Textová kampaň',   ico:'📝', bg:'#E6F0FF', budget:'10000', bid:'CPC',  kw:['Generická klíčová slova','Kategoriová klíčová slova'], geo:['Česká republika'] },
+      { name:'Shopping kampaň',       type:'Produktová kampaň',ico:'🛍️', bg:'#EFF6FF', budget:'18000', bid:'ROAS', kw:['Všechny produkty'],                              geo:['Česká republika'] },
+      { name:'Display — Povědomí',    type:'Display kampaň',   ico:'🖼️', bg:'#F5F3FF', budget:'12000', bid:'CPM',  kw:['Zájmové segmenty','Demografické cílení'],        geo:['Česká republika'] },
+      { name:'Dynamický retargeting', type:'Retargeting',      ico:'🔄', bg:'#F0FDF4', budget:'8000',  bid:'CPA',  kw:['Zákazníci bez konverze','Návštěvníci košíku'],   geo:['Česká republika'] },
+    ]
+  },
+  brand: {
+    name: 'Brandová strategie',
+    meta: 'Klient: Rohlik.cz · 4 kampaně · Doporučený rozpočet: 40–70 tis. Kč/měs.',
+    camps: [
+      { name:'Display — Povědomí o značce',type:'Display kampaň',  ico:'🖼️', bg:'#F5F3FF', budget:'20000', bid:'CPM',  kw:['Demografické cílení','Zájmové segmenty'], geo:['Česká republika','Slovensko'] },
+      { name:'Obsahová — Zájmy a témata',  type:'Obsahová kampaň', ico:'📄', bg:'#ECFDF5', budget:'15000', bid:'CPM',  kw:['Kontextová klíčová slova','Tematická klíčová slova'], geo:['Česká republika'] },
+      { name:'Video kampaň',               type:'Video kampaň',    ico:'▶️', bg:'#FEF2F2', budget:'18000', bid:'CPV',  kw:['In-stream reklamy','Demografika 18–45 let'],geo:['Česká republika'] },
+      { name:'Brandové vyhledávání',       type:'Textová kampaň',  ico:'📝', bg:'#E6F0FF', budget:'7000',  bid:'CPC',  kw:['Brandová klíčová slova'],                 geo:['Česká republika'] },
+    ]
+  }
+};
+
+/* ── VIEW MANAGEMENT ─────────────────────────── */
+const ALL_VIEWS = ['dashboard','klienti','kampane','wizard','nastaveni'];
+const NAV_MAP   = { dashboard:'nav-dashboard', klienti:'nav-klienti', kampane:'nav-kampane', nastaveni:'nav-nastaveni' };
+
+function showView(name) {
+  ALL_VIEWS.forEach(v => {
+    document.getElementById('view-' + v).classList.toggle('active', v === name);
+  });
+  Object.entries(NAV_MAP).forEach(([k, id]) => {
+    document.getElementById(id).classList.toggle('active', k === name);
+  });
+  document.getElementById('main').scrollTop = 0;
+}
+
+/* ── BADGE HELPERS ───────────────────────────── */
+function badgeStatus(s) {
+  const map = {
+    active: ['bg-success','Aktivní'],
+    paused: ['bg-warning','Pozastavena'],
+    draft:  ['bg-gray',   'Koncept'],
+  };
+  const [cls, label] = map[s] || ['bg-gray', s];
+  return `<span class="badge ${cls}"><span class="bd"></span>${label}</span>`;
+}
+
+function typeTag(t) {
+  return `<span class="badge bg-gray">${t}</span>`;
+}
+
+/* ── RENDER DASHBOARD ────────────────────────── */
+function renderDashboard() {
+  const tb = document.getElementById('tbl-dashboard');
+  tb.innerHTML = CAMPAIGNS.slice(0, 7).map(c => `
+    <tr>
+      <td><span class="fw700">${c.client}</span></td>
+      <td>${c.name}</td>
+      <td>${typeTag(c.type)}</td>
+      <td>${badgeStatus(c.status)}</td>
+      <td>${c.budget}</td>
+      <td><strong>${c.ctr}</strong></td>
+      <td class="tc-muted">${c.date}</td>
+    </tr>
+  `).join('');
+}
+
+/* ── RENDER CAMPAIGNS TABLE ──────────────────── */
+function renderCampaignsTable() {
+  const tb = document.getElementById('tbl-kampane');
+  tb.innerHTML = CAMPAIGNS.map(c => `
+    <tr>
+      <td><span class="fw700">${c.client}</span></td>
+      <td>${c.name}</td>
+      <td>${typeTag(c.type)}</td>
+      <td>${badgeStatus(c.status)}</td>
+      <td>${c.budget}</td>
+      <td><strong>${c.ctr}</strong></td>
+      <td>${c.conv}</td>
+      <td class="tc-muted">${c.date}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm">Zobrazit</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ── RENDER CLIENTS ──────────────────────────── */
+/* ── SKLIK ACCOUNTS ──────────────────────────── */
+const SKLIK_ACCOUNTS = [
+  { id: 112233, name: 'Rohlik.cz',        login: 'marketing@rohlik.cz'    },
+  { id: 224455, name: 'Alza.cz',          login: 'ppc@alza.cz'            },
+  { id: 336677, name: 'Sportisimo',        login: 'kampane@sportisimo.cz'  },
+  { id: 448899, name: 'Kasa.cz',           login: 'ppc@kasa.cz'            },
+  { id: 551122, name: 'ČSOB Pojišťovna',   login: 'digital@csobpoj.cz'     },
+  { id: 663344, name: 'Notino.cz',         login: 'ads@notino.cz'          },
+];
+
+function populateAccountSelect() {
+  const sel = document.getElementById('s4-account-select');
+  if (!sel) return;
+  SKLIK_ACCOUNTS.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = `${a.name}  ·  ${a.login}  (ID: ${a.id})`;
+    sel.appendChild(opt);
+  });
+}
+
+/* ── CLIENTS VIEW TOGGLE ─────────────────────── */
+let clientsViewMode = 'grid';
+
+function setClientsView(mode) {
+  clientsViewMode = mode;
+  document.getElementById('clients-grid').classList.toggle('list-mode', mode === 'list');
+  document.getElementById('vt-grid').classList.toggle('active', mode === 'grid');
+  document.getElementById('vt-list').classList.toggle('active', mode === 'list');
+}
+
+/* ── DARK MODE ───────────────────────────────── */
+function toggleDarkMode(on) {
+  document.body.classList.toggle('dark', on);
+  localStorage.setItem('darkMode', on ? '1' : '0');
+}
+
+function renderClients() {
+  const grid = document.getElementById('clients-grid');
+  grid.innerHTML = CLIENTS.map(c => `
+    <div class="client-card" onclick="startNewCampaign()">
+      <div class="cc-hd">
+        <div class="cc-logo" style="background:${c.color}">${c.init}</div>
+        <div style="flex:1;min-width:0">
+          <div class="cc-name">${c.name}</div>
+          <div class="cc-domain">${c.domain}</div>
+        </div>
+        ${badgeStatus(c.status)}
+      </div>
+      <div class="cc-stats">
+        <div>
+          <div class="cc-stat-lbl">Kampaně</div>
+          <div class="cc-stat-val">${c.camps}</div>
+        </div>
+        <div>
+          <div class="cc-stat-lbl">Měs. rozpočet</div>
+          <div class="cc-stat-val">${c.budget}</div>
+        </div>
+      </div>
+      <div class="cc-ft">
+        <span style="font-size:12px;color:var(--tt)">Poslední: ${c.last}</span>
+        <button class="btn btn-primary btn-sm" onclick="startNewCampaign();event.stopPropagation()">+ Kampaň</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── WIZARD ──────────────────────────────────── */
+let wzStep = 1;
+
+function startNewCampaign() {
+  showView('wizard');
+  resetWizard();
+  goToStep(1);
+}
+
+function goToStep(n) {
+  wzStep = n;
+  [1,2,3,4].forEach(i => {
+    document.getElementById('wz-s' + i).classList.toggle('active', i === n);
+    const ps = document.getElementById('ps-' + i);
+    const pc = document.getElementById('pc-' + i);
+    ps.className = 'ps' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (i < n) {
+      pc.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else {
+      pc.textContent = i;
     }
+    if (i < 4) document.getElementById('pl-' + i).classList.toggle('done', i < n);
+  });
+  const wc = document.getElementById('wz-content');
+  if (wc) wc.scrollTop = 0;
+}
 
-    document.getElementById('taskInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') addTask();
-    });
+/* ── AI ANALYSIS ─────────────────────────────── */
+const AI_STEPS = ['ai-0','ai-1','ai-2','ai-3'];
+const AI_ICONS = ['⚡','🔗','🎯','📊'];
+const AI_DELAYS = [0, 1100, 2200, 3200];
 
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+function startAnalysis() {
+  goToStep(2);
+
+  AI_STEPS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'ai-si pending';
+    el.querySelector('.ai-si-ic').textContent = AI_ICONS[i];
+  });
+
+  AI_STEPS.forEach((id, i) => {
+    setTimeout(() => {
+      if (i > 0) {
+        const prev = document.getElementById(AI_STEPS[i-1]);
+        prev.className = 'ai-si done';
+        prev.querySelector('.ai-si-ic').textContent = '✓';
+      }
+      document.getElementById(id).className = 'ai-si running';
+    }, AI_DELAYS[i]);
+  });
+
+  setTimeout(() => {
+    const last = document.getElementById(AI_STEPS[AI_STEPS.length - 1]);
+    last.className = 'ai-si done';
+    last.querySelector('.ai-si-ic').textContent = '✓';
+    setTimeout(() => goToStep(3), 550);
+  }, 4300);
+}
+
+/* ── SELECT VARIANT ──────────────────────────── */
+function selectVariant(key) {
+  document.querySelectorAll('.vc').forEach(el => el.classList.remove('selected'));
+  const varData = VARIANT_CAMPS[key];
+  document.getElementById('cd-strategy-name').textContent = varData.name;
+  document.getElementById('cd-meta').textContent = varData.meta;
+  renderCampaignDetail(varData.camps);
+  setTimeout(() => goToStep(4), 300);
+}
+
+/* ── AI SUGGESTIONS DATA ─────────────────────── */
+const AI_SUGGESTIONS = {
+  CPC: {
+    settings: [
+      { title: 'Maximální CPC: 12–18 Kč',       desc: 'Doporučená hodnota pro tento typ kampaně a odvětví',      field: 'cpc',   value: '15' },
+      { title: 'Denní limit: navýšit o 15 %',    desc: 'Kampaň je pravděpodobně omezena rozpočtem ve špičce',     field: 'budget', value: null },
+      { title: 'Plánování reklam: Po–Pá 7–21 h', desc: 'Nejvyšší konverzní aktivita cílové skupiny',              field: 'sched', value: null },
+    ],
+    keywords: ['doručení zdarma','akce','sleva','objednávka online','rychlé doručení'],
+    tips: [
+      'Přidejte vylučující klíčová slova pro irrelevantní dotazy (např. "zdarma", "návod").',
+      'Využijte rozšíření reklam — sitelinky, volání a strukturované úryvky zvyšují CTR o 15–30 %.',
+      'Sledujte podíl zobrazení (Impression Share) — pokud je pod 60 %, zvyšte CPC nebo rozpočet.',
+    ],
+  },
+  CPA: {
+    settings: [
+      { title: 'Cílové CPA: 220–280 Kč',         desc: 'Optimální rozsah na základě historických dat odvětví',    field: 'cpa',   value: '250' },
+      { title: 'Min. 30 konverzí / měsíc',        desc: 'Strategie potřebuje dostatek dat pro učení algoritmu',    field: 'conv',  value: null },
+      { title: 'Okno konverze: 30 dní',           desc: 'Doporučeno pro e-commerce s delším rozhodovacím cyklem',  field: 'win',   value: null },
+    ],
+    keywords: ['košík','nákup','porovnat ceny','koupit','objednat'],
+    tips: [
+      'Nechejte kampaň 2–3 týdny ve fázi učení bez velkých úprav — algoritmus potřebuje data.',
+      'Segmentujte publika dle hodnoty zákazníka (LTV) a nastavte různé CPA cíle.',
+      'Přidejte mikrokonverze (přidání do košíku, registrace) pro rychlejší učení strategie.',
+    ],
+  },
+  ROAS: {
+    settings: [
+      { title: 'Cílové ROAS: 400–600 %',         desc: 'Průměr pro e-commerce v tomto odvětví',                   field: 'roas',  value: '500' },
+      { title: 'Min. útrata: 200 Kč/den',         desc: 'Zajišťuje dostatek dat pro optimalizaci nabídek',         field: 'min',   value: '200' },
+      { title: 'Sezónní korekce: +20 % víkendy',  desc: 'Nákupní aktivita roste v sobotu a neděli',               field: 'seas',  value: null },
+    ],
+    keywords: ['nejlepší cena','výhodná nabídka','top produkt','akční cena'],
+    tips: [
+      'Rozdělte produkty do skupin podle marže — vysoce ziskové produkty zaslouží vyšší ROAS cíl.',
+      'Zkontrolujte feed — chybějící GTIN a nízká kvalita obrázků snižují výkon o 25 %.',
+      'Aktivujte dynamický remarketing pro zobrazení přesně těch produktů, které uživatel prohlížel.',
+    ],
+  },
+  CPM: {
+    settings: [
+      { title: 'Max. CPM: 45–70 Kč',             desc: 'Doporučeno pro brandové display kampaně',                 field: 'cpm',   value: '55' },
+      { title: 'Frekvence: max. 3× / uživatel',  desc: 'Zabraňuje "banner blindness" a úniku publika',            field: 'freq',  value: '3' },
+      { title: 'Viewability: min. 70 %',          desc: 'Cílejte pouze na viditelná místa (In-screen)',            field: 'view',  value: null },
+    ],
+    keywords: ['brand','povědomí','nová kolekce','poznávejte nás','přijďte se podívat'],
+    tips: [
+      'Použijte responzivní display reklamy — Sklik automaticky otestuje nejlepší kombinace.',
+      'Vylučte umístění s nízkým výkonem (hry pro mobilní zařízení, nekvalitní weby).',
+      'Nastavte vlastní publika podle zájmů a navštívených URL pro lepší relevanci zobrazení.',
+    ],
+  },
+  CPV: {
+    settings: [
+      { title: 'Max. CPV: 0.8–1.5 Kč',           desc: 'Průměrná cena za zhlédnutí v českém prostředí',          field: 'cpv',   value: '1.1' },
+      { title: 'Cílová délka videa: 15–30 s',     desc: 'Kratší videa mají vyšší míru dokončení',                 field: 'len',   value: null },
+      { title: 'Skip po 5 s: optimalizovat CTA',  desc: 'Klíčové sdělení a logo umístěte v prvních 5 sekundách',  field: 'skip',  value: null },
+    ],
+    keywords: ['podívejte se','sledujte','nová kolekce','video','příběh značky'],
+    tips: [
+      'Přidejte CTA overlay tlačítko s přímým odkazem na produkt — zvyšuje CTR o 30 %.',
+      'Testujte různé délky videa: 6s bumper ads vs. 15s vs. 30s pro zjištění optimální varianty.',
+      'Sledujte metriku View-Through Conversion — videa ovlivňují nákupy i bez přímého kliknutí.',
+    ],
+  },
+};
+
+/* ── CAMPAIGN DETAIL ─────────────────────────── */
+function renderCampaignDetail(camps) {
+  const list = document.getElementById('camps-list');
+  list.innerHTML = camps.map((c, idx) => {
+    const sugg = AI_SUGGESTIONS[c.bid] || AI_SUGGESTIONS.CPC;
+    return `
+    <div class="ci" id="ci-${idx}">
+      <div class="ci-hd" onclick="toggleCI(${idx})">
+        <div class="ci-ico" style="background:${c.bg}">${c.ico}</div>
+        <div style="flex:1;min-width:0">
+          <div class="ci-name">${c.name}</div>
+          <div class="ci-type">${c.type} · Denní rozpočet: ${Number(c.budget).toLocaleString('cs')} Kč · Nabídky: ${c.bid}</div>
+        </div>
+        <span class="badge bg-gray" style="flex-shrink:0"><span class="bd"></span>Připravena</span>
+        <div class="ci-chev" style="margin-left:12px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="ci-body">
+        <div class="ci-grid">
+          <div class="ci-fg">
+            <div class="ci-lbl">Název kampaně</div>
+            <input type="text" class="fi" value="${c.name}" />
+          </div>
+          <div class="ci-fg">
+            <div class="ci-lbl">Denní rozpočet (Kč)</div>
+            <input type="number" class="fi" id="ci-budget-${idx}" value="${c.budget}" />
+          </div>
+          <div class="ci-fg">
+            <div class="ci-lbl">Strategie nabídek</div>
+            <select class="fi-sel">
+              <option ${c.bid==='CPC'  ?'selected':''}>CPC</option>
+              <option ${c.bid==='CPA'  ?'selected':''}>CPA</option>
+              <option ${c.bid==='ROAS' ?'selected':''}>ROAS</option>
+              <option ${c.bid==='CPM'  ?'selected':''}>CPM</option>
+              <option ${c.bid==='CPV'  ?'selected':''}>CPV</option>
+            </select>
+          </div>
+        </div>
+        <div class="tgt-section">
+          <div class="tgt-lbl">Cílení — klíčová slova / segmenty</div>
+          <div class="tgt-pills" id="ci-kw-${idx}">
+            ${c.kw.map(k => `<span class="tgt-pill on">${k}</span>`).join('')}
+            <span class="tgt-pill tgt-pill-add">+ Přidat cílení</span>
+          </div>
+        </div>
+        <div class="tgt-section">
+          <div class="tgt-lbl">Geografické cílení</div>
+          <div class="tgt-pills">
+            ${c.geo.map(g => `<span class="tgt-pill on">${g}</span>`).join('')}
+            <span class="tgt-pill tgt-pill-add">+ Přidat region</span>
+          </div>
+        </div>
+
+        <!-- AI Assist trigger -->
+        <div style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+          <button class="ai-assist-btn" onclick="toggleAiPanel(${idx})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+            AI asistent — navrhnout nastavení
+          </button>
+          <span style="font-size:12px;color:var(--tt)">Analýza pro typ ${c.bid} · ${c.type}</span>
+        </div>
+
+        <!-- AI Panel -->
+        <div class="ai-panel" id="ai-panel-${idx}">
+          <div class="ai-panel-hd">
+            <div class="ai-panel-hd-icon">S</div>
+            AI doporučení pro kampaň — ${c.name}
+          </div>
+          <div class="ai-panel-body">
+
+            <div class="ai-sugg-group">
+              <div class="ai-sugg-lbl">Doporučené nastavení</div>
+              ${sugg.settings.map((s, si) => `
+                <div class="ai-sugg-row">
+                  <div class="ai-sugg-content">
+                    <div class="ai-sugg-title">${s.title}</div>
+                    <div class="ai-sugg-desc">${s.desc}</div>
+                  </div>
+                  <button class="ai-sugg-apply" id="ai-apply-${idx}-${si}" onclick="applyAiSugg(${idx}, ${si}, '${s.field}', '${s.value}')">
+                    Aplikovat
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="ai-sugg-group">
+              <div class="ai-sugg-lbl">Navrhovaná klíčová slova / segmenty</div>
+              <div class="ai-kw-pills">
+                ${sugg.keywords.map((kw, ki) => `
+                  <span class="ai-kw-pill" id="ai-kw-${idx}-${ki}" onclick="addAiKeyword(${idx}, ${ki}, '${kw}')">
+                    + ${kw}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="ai-sugg-group">
+              <div class="ai-sugg-lbl">Tipy k optimalizaci</div>
+              <div class="ai-tips">
+                ${sugg.tips.map(t => `
+                  <div class="ai-tip">
+                    <span class="ai-tip-bullet">→</span>
+                    <span>${t}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `}).join('');
+
+  setTimeout(() => toggleCI(0), 80);
+}
+
+function toggleCI(idx) {
+  const el = document.getElementById('ci-' + idx);
+  if (el) el.classList.toggle('open');
+}
+
+function toggleAiPanel(idx) {
+  const panel = document.getElementById('ai-panel-' + idx);
+  if (panel) panel.classList.toggle('open');
+}
+
+function applyAiSugg(ciIdx, suggIdx, field, value) {
+  const btn = document.getElementById(`ai-apply-${ciIdx}-${suggIdx}`);
+  if (!btn || btn.classList.contains('applied')) return;
+
+  if (field === 'budget' && value === 'null') {
+    const budgetEl = document.getElementById('ci-budget-' + ciIdx);
+    if (budgetEl) {
+      const cur = parseInt(budgetEl.value) || 0;
+      budgetEl.value = Math.round(cur * 1.15);
+      flashField(budgetEl);
     }
+  } else if (value && value !== 'null') {
+    // For numeric fields — show as toast info (no direct input targeted generically)
+    showToast(`✦ Nastavení aplikováno: ${btn.closest('.ai-sugg-row').querySelector('.ai-sugg-title').textContent}`);
+  } else {
+    showToast(`✦ Nastavení aplikováno: ${btn.closest('.ai-sugg-row').querySelector('.ai-sugg-title').textContent}`);
+  }
 
-    renderTasks();
-  </script>
+  btn.textContent = '✓ Aplikováno';
+  btn.classList.add('applied');
+}
+
+function addAiKeyword(ciIdx, kwIdx, kw) {
+  const pill = document.getElementById(`ai-kw-${ciIdx}-${kwIdx}`);
+  if (!pill || pill.classList.contains('added')) return;
+  pill.classList.add('added');
+  pill.textContent = '✓ ' + kw;
+
+  const kwContainer = document.getElementById('ci-kw-' + ciIdx);
+  if (kwContainer) {
+    const addBtn = kwContainer.querySelector('.tgt-pill-add');
+    const newPill = document.createElement('span');
+    newPill.className = 'tgt-pill on';
+    newPill.textContent = kw;
+    kwContainer.insertBefore(newPill, addBtn);
+  }
+}
+
+/* ── MOCK CLIENT PROFILES ────────────────────── */
+const FILE_PROFILES = [
+  {
+    keywords: ['rohlik','rohlik.cz','supermarket','potraviny'],
+    client: 'Rohlik.cz',
+    url: 'https://www.rohlik.cz',
+    brief: 'Rohlik.cz je online supermarket s doručením do 90 minut. Cílem kampaně je zvýšení nových registrací a prvních nákupů. Cílíme na domácnosti v Praze a Brně, zejména rodiče 25–45 let. Klíčové sdělení: doručení do 90 minut, čerstvé produkty, první nákup se slevou 300 Kč.',
+    budgetMin: 35000, budgetMax: 80000,
+  },
+  {
+    keywords: ['alza','alza.cz','elektronika','technika'],
+    client: 'Alza.cz',
+    url: 'https://www.alza.cz',
+    brief: 'Alza.cz je největší český e-shop s elektronikou a IT vybavením. Kampaň cílí na zvýšení prodejů v kategorii notebooků a mobilních telefonů. Cílová skupina: muži a ženy 20–45 let, technologicky zdatní zákazníci. Sdělení: nejnižší ceny, doprava zdarma, vrácení do 30 dní.',
+    budgetMin: 55000, budgetMax: 130000,
+  },
+  {
+    keywords: ['sportisimo','sport','fitness','outdoor'],
+    client: 'Sportisimo',
+    url: 'https://www.sportisimo.cz',
+    brief: 'Sportisimo je přední řetězec se sportovním vybavením. Kampaň podporuje letní kolekci a výprodej jarního zboží. Cílová skupina: aktivní lidé 18–50 let. Klíčové sdělení: kvalitní sportovní vybavení, výprodej až –50 %, doprava zdarma nad 999 Kč.',
+    budgetMin: 25000, budgetMax: 60000,
+  },
+  {
+    keywords: ['csob','pojistka','pojistovna','finance','pojisteni'],
+    client: 'ČSOB Pojišťovna',
+    url: 'https://www.csobpoj.cz',
+    brief: 'ČSOB Pojišťovna nabízí komplexní pojistné produkty pro fyzické osoby i firmy. Kampaň se zaměřuje na životní a majetkové pojištění. Cílová skupina: rodiny a majitelé nemovitostí 30–55 let. Sdělení: spolehlivá ochrana, rychlé vyřízení pojistné události, sjednání online.',
+    budgetMin: 60000, budgetMax: 150000,
+  },
+  {
+    keywords: ['notino','parfem','kosmetika','beauty'],
+    client: 'Notino.cz',
+    url: 'https://www.notino.cz',
+    brief: 'Notino.cz je největší online parfumerie v Evropě. Kampaň cílí na zvýšení prodejů prémiových parfémů a péče o pleť. Cílová skupina: ženy 22–45 let se zájmem o beauty a lifestyle. Sdělení: originální produkty, doprava zdarma, vzorky zdarma k objednávce.',
+    budgetMin: 20000, budgetMax: 55000,
+  },
+];
+
+function detectProfile(files) {
+  const allNames = files.map(f => f.name.toLowerCase()).join(' ');
+  for (const p of FILE_PROFILES) {
+    if (p.keywords.some(kw => allNames.includes(kw))) return p;
+  }
+  // Fallback: pick deterministically based on file count
+  return FILE_PROFILES[files.length % FILE_PROFILES.length];
+}
+
+/* ── FILE UPLOAD ─────────────────────────────── */
+let uploadedFiles = [];
+let _analyzeTimer = null;
+
+function dzOver(e)  { e.preventDefault(); document.getElementById('dropzone').classList.add('drag-over'); }
+function dzLeave()  { document.getElementById('dropzone').classList.remove('drag-over'); }
+function dzDrop(e)  { e.preventDefault(); dzLeave(); addFiles([...e.dataTransfer.files]); }
+function fileSelect(e) { addFiles([...e.target.files]); }
+
+function addFiles(files) {
+  const isFirst = uploadedFiles.length === 0;
+  uploadedFiles = [...uploadedFiles, ...files];
+  renderFileList();
+  if (isFirst && uploadedFiles.length > 0) {
+    runFileAnalysis();
+  }
+}
+
+function removeFile(idx) {
+  uploadedFiles.splice(idx, 1);
+  renderFileList();
+}
+
+function renderFileList() {
+  const list = document.getElementById('file-list');
+  list.innerHTML = uploadedFiles.map((f, i) => {
+    const t = f.type;
+    const ico = t.startsWith('image') ? '🖼️' : t.startsWith('video') ? '▶️' : t.includes('pdf') ? '📄' : '📎';
+    const size = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : Math.ceil(f.size/1024)+' KB';
+    return `<div class="file-chip">${ico} ${f.name} <span style="opacity:.55;font-size:11px">${size}</span><span class="fc-rm" onclick="removeFile(${i})">×</span></div>`;
+  }).join('');
+}
+
+/* ── FILE ANALYSIS & PREFILL ─────────────────── */
+function runFileAnalysis() {
+  clearTimeout(_analyzeTimer);
+  const box = document.getElementById('dz-analyzing');
+  box.style.display = 'block';
+
+  const steps = [0, 1, 2, 3].map(i => document.getElementById('dza-' + i));
+  const delays = [0, 700, 1500, 2300];
+
+  steps.forEach(s => {
+    s.className = 'dza-step';
+    s.querySelector('.dza-dot').className = 'dza-dot';
+  });
+  steps[0].className = 'dza-step active';
+  steps[0].querySelector('.dza-dot').className = 'dza-dot running';
+
+  delays.forEach((d, i) => {
+    setTimeout(() => {
+      if (i > 0) {
+        steps[i-1].className = 'dza-step done';
+        steps[i-1].querySelector('.dza-dot').className = 'dza-dot done';
+      }
+      steps[i].className = 'dza-step active';
+      steps[i].querySelector('.dza-dot').className = 'dza-dot running';
+    }, d);
+  });
+
+  setTimeout(() => {
+    steps[3].className = 'dza-step done';
+    steps[3].querySelector('.dza-dot').className = 'dza-dot done';
+    setTimeout(() => {
+      box.style.display = 'none';
+      prefillForm(detectProfile(uploadedFiles));
+    }, 500);
+  }, 3100);
+}
+
+function prefillForm(profile) {
+  const badge = '<span class="autofill-badge">✦ předvyplněno</span>';
+
+  // Client
+  const sel = document.getElementById('wz-client');
+  for (const opt of sel.options) {
+    if (opt.text === profile.client) { opt.selected = true; break; }
+  }
+  flashField(sel);
+  document.getElementById('lbl-client-badge').innerHTML = badge;
+
+  // URL
+  const urlEl = document.getElementById('wz-url');
+  urlEl.value = profile.url;
+  flashField(urlEl);
+  document.getElementById('lbl-url-badge').innerHTML = badge;
+
+  // Brief
+  const briefEl = document.getElementById('wz-brief');
+  briefEl.value = '';
+  typewriterFill(briefEl, profile.brief);
+  document.getElementById('lbl-brief-badge').innerHTML = badge;
+
+  // Budget
+  setTimeout(() => {
+    const minEl = document.getElementById('wz-budget-min');
+    const maxEl = document.getElementById('wz-budget-max');
+    minEl.value = profile.budgetMin;
+    maxEl.value = profile.budgetMax;
+    flashField(minEl);
+    flashField(maxEl);
+    document.getElementById('lbl-budget-badge').innerHTML = badge;
+  }, 400);
+
+  showToast('✦ Formulář byl předvyplněn na základě nahraných podkladů');
+}
+
+function flashField(el) {
+  el.classList.remove('autofilled');
+  void el.offsetWidth; // reflow
+  el.classList.add('autofilled');
+}
+
+function typewriterFill(el, text) {
+  flashField(el);
+  let i = 0;
+  const speed = Math.max(10, Math.min(18, 1800 / text.length));
+  function tick() {
+    if (i <= text.length) {
+      el.value = text.slice(0, i);
+      i++;
+      setTimeout(tick, speed);
+    }
+  }
+  tick();
+}
+
+/* ── WIZARD RESET ────────────────────────────── */
+function resetWizard() {
+  uploadedFiles = [];
+  clearTimeout(_analyzeTimer);
+  document.getElementById('file-list').innerHTML = '';
+  document.getElementById('file-input').value = '';
+  document.getElementById('dz-analyzing').style.display = 'none';
+  ['wz-client','wz-url','wz-brief','wz-budget-min','wz-budget-max'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = el.tagName === 'SELECT' ? '' : ''; el.classList.remove('autofilled'); }
+  });
+  ['lbl-client-badge','lbl-url-badge','lbl-brief-badge','lbl-budget-badge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  const steps = [0,1,2,3].map(i => document.getElementById('dza-' + i));
+  steps.forEach(s => { s.className = 'dza-step'; s.querySelector('.dza-dot').className = 'dza-dot'; });
+}
+
+/* ── TOAST ───────────────────────────────────── */
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* ── INIT ────────────────────────────────────── */
+renderDashboard();
+renderCampaignsTable();
+renderClients();
+renderCampaignDetail(VARIANT_CAMPS.mix.camps);
+populateAccountSelect();
+
+// Restore dark mode preference
+if (localStorage.getItem('darkMode') === '1') {
+  document.body.classList.add('dark');
+  const tog = document.getElementById('dark-mode-toggle');
+  if (tog) tog.checked = true;
+}
+</script>
 </body>
 </html>
